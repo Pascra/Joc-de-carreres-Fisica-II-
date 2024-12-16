@@ -167,6 +167,10 @@ bool ModuleGame::Start()
 	box = LoadTexture("Assets/crate.png");
 	rick = LoadTexture("Assets/rick_head.png");
 	car = LoadTexture("Assets/pitstop_car_3_right.png");
+
+	map = LoadTexture("Assets/circuito.png");
+
+	
 	
 	bonus_fx = App->audio->LoadFx("Assets/bonus.wav");
 
@@ -186,31 +190,32 @@ bool ModuleGame::CleanUp()
 // Update: draw background
 update_status ModuleGame::Update()
 {
-	if(IsKeyPressed(KEY_SPACE))
+	
+	DrawTexture(map, 425, 0, WHITE);  
+
+	if (IsKeyPressed(KEY_SPACE))
 	{
 		ray_on = !ray_on;
 		ray.x = GetMouseX();
 		ray.y = GetMouseY();
 	}
 
-	if(IsKeyPressed(KEY_ONE))
+	if (IsKeyPressed(KEY_ONE))
 	{
 		entities.emplace_back(new Circle(App->physics, GetMouseX(), GetMouseY(), this, circle));
-		
 	}
 
-	if(IsKeyPressed(KEY_TWO))
+	if (IsKeyPressed(KEY_TWO))
 	{
 		entities.emplace_back(new Box(App->physics, GetMouseX(), GetMouseY(), this, box));
 	}
 
-	if(IsKeyPressed(KEY_THREE))
+	if (IsKeyPressed(KEY_THREE))
 	{
 		entities.emplace_back(new Rick(App->physics, GetMouseX(), GetMouseY(), this, rick));
 	}
 
-	// Prepare for raycast ------------------------------------------------------
-	
+	// Preparar para el raycast
 	vec2i mouse;
 	mouse.x = GetMouseX();
 	mouse.y = GetMouseY();
@@ -218,9 +223,7 @@ update_status ModuleGame::Update()
 
 	vec2f normal(0.0f, 0.0f);
 
-	// All draw functions ------------------------------------------------------
-
-
+	// Dibujar todas las entidades
 	for (PhysicEntity* entity : entities)
 	{
 		entity->Update();
@@ -233,12 +236,11 @@ update_status ModuleGame::Update()
 			}
 		}
 	}
-	
 
-	// ray -----------------
-	if(ray_on == true)
+	// Dibujar el rayo
+	if (ray_on == true)
 	{
-		vec2f destination((float)(mouse.x-ray.x), (float)(mouse.y-ray.y));
+		vec2f destination((float)(mouse.x - ray.x), (float)(mouse.y - ray.y));
 		destination.Normalize();
 		destination *= (float)ray_hit;
 
@@ -246,12 +248,15 @@ update_status ModuleGame::Update()
 
 		if (normal.x != 0.0f)
 		{
-			DrawLine((int)(ray.x + destination.x), (int)(ray.y + destination.y), (int)(ray.x + destination.x + normal.x * 25.0f), (int)(ray.y + destination.y + normal.y * 25.0f), Color{ 100, 255, 100, 255 });
+			DrawLine((int)(ray.x + destination.x), (int)(ray.y + destination.y),
+				(int)(ray.x + destination.x + normal.x * 25.0f),
+				(int)(ray.y + destination.y + normal.y * 25.0f), Color{ 100, 255, 100, 255 });
 		}
 	}
 
 	return UPDATE_CONTINUE;
 }
+
 
 void ModuleGame::OnCollision(PhysBody* bodyA, PhysBody* bodyB)
 {

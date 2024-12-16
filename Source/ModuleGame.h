@@ -34,6 +34,7 @@ public:
 	Texture2D box;
 	Texture2D rick;
 	Texture2D car;
+	Texture2D map;
 
 	uint32 bonus_fx;
 
