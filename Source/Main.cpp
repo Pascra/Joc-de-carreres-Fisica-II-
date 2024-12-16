@@ -1,36 +1,87 @@
-// main.cpp
-#include "Scene.h"
+#include "Application.h"
+#include "Globals.h"
+
 #include "raylib.h"
-#include <iostream>
 
-#define TITLE "Raylib TMX Viewer"
+#include <stdlib.h>
 
-int main() {
-    // Inicializa la ventana
-    InitWindow(800, 600, TITLE);
-    SetTargetFPS(60);
+enum main_states
+{
+	MAIN_CREATION,
+	MAIN_START,
+	MAIN_UPDATE,
+	MAIN_FINISH,
+	MAIN_EXIT
+};
 
-    Scene scene;
+int main(int argc, char ** argv)
+{
+	LOG("Starting game '%s'...", TITLE);
 
-    if (!scene.LoadMap("Assets/CircuitoFinalTotal.tmx")) {
-        std::cerr << "Failed to load map!" << std::endl;
-        CloseWindow();
-        return -1;
-    }
+	int main_return = EXIT_FAILURE;
+	main_states state = MAIN_CREATION;
+	Application* App = NULL;
 
-    while (!WindowShouldClose()) {
-        scene.Update(); // Actualiza la lógica de la escena
+	while (state != MAIN_EXIT)
+	{
+		switch (state)
+		{
+		case MAIN_CREATION:
 
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
+			LOG("-------------- Application Creation --------------");
+			App = new Application();
+			state = MAIN_START;
+			break;
 
-        scene.Render(); // Renderiza el mapa
+		case MAIN_START:
 
-        EndDrawing();
-    }
+			LOG("-------------- Application Init --------------");
+			if (App->Init() == false)
+			{
+				LOG("Application Init exits with ERROR");
+				state = MAIN_EXIT;
+			}
+			else
+			{
+				state = MAIN_UPDATE;
+				LOG("-------------- Application Update --------------");
+			}
 
-    scene.Unload(); // Limpia recursos
-    CloseWindow();
+			break;
 
-    return 0;
+		case MAIN_UPDATE:
+		{
+			int update_return = App->Update();
+
+			if (update_return == UPDATE_ERROR)
+			{
+				LOG("Application Update exits with ERROR");
+				state = MAIN_EXIT;
+			}
+
+			if (update_return == UPDATE_STOP)
+				state = MAIN_FINISH;
+		}
+			break;
+
+		case MAIN_FINISH:
+
+			LOG("-------------- Application CleanUp --------------");
+			if (App->CleanUp() == false)
+			{
+				LOG("Application CleanUp exits with ERROR");
+			}
+			else
+				main_return = EXIT_SUCCESS;
+
+			state = MAIN_EXIT;
+
+			break;
+
+		}
+	}
+
+	delete App;
+	LOG("Exiting game '%s'...\n", TITLE);
+	return main_return;
 }

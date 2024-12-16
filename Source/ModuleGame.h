@@ -33,7 +33,6 @@ public:
 	Texture2D circle;
 	Texture2D box;
 	Texture2D rick;
-	Texture2D Car;
 
 	uint32 bonus_fx;
 

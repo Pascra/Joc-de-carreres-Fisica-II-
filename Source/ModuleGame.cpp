@@ -166,7 +166,6 @@ bool ModuleGame::Start()
 	circle = LoadTexture("Assets/wheel.png"); 
 	box = LoadTexture("Assets/crate.png");
 	rick = LoadTexture("Assets/rick_head.png");
-	Car = LoadTexture("Assets/pitstop_car_3_right.png");
 	
 	bonus_fx = App->audio->LoadFx("Assets/bonus.wav");
 
