@@ -157,7 +157,7 @@ update_status ModuleGame::Update()
 {
     // Dibujar el mapa y el coche
     DrawTexture(map, 425, 0, WHITE);
-    DrawTexture(car, 425, 0, WHITE);
+   // DrawTexture(car, 425, 0, WHITE);
 
     // Alternar el estado del rayo
     if (IsKeyPressed(KEY_SPACE))

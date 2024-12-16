@@ -18,7 +18,16 @@ bool ModulePlayer::Start()
     LOG("Loading player");
 
     // Cargar la textura del coche
-    car_texture = LoadTexture("Assets/pitstop_car_3_right.png"); // Asegúrate de que el archivo esté en la ruta correcta
+    car_texture = LoadTexture("Assets/pitstop_car_3_right.png");
+
+    // Verificar si la textura se cargó correctamente
+    if (car_texture == nullptr) {
+        LOG("Failed to load car texture!");
+        return false;
+    }
+    else {
+        LOG("Car texture loaded successfully.");
+    }
 
     return true;
 }
@@ -57,9 +66,15 @@ update_status ModulePlayer::Update()
         rotation = 90.0f; // Rotación hacia la derecha
     }
 
-    // Actualizar la posición del coche en función de las teclas presionadas
-    // Dibujar el coche (con rotación)
-    DrawTextureEx(car_texture, position, rotation, 1.0f, WHITE);
+    // Verificar las coordenadas de la posición
+    LOG("Player Position: x = %f, y = %f", position.x, position.y);
+
+    // Verificar que el coche está dentro de los límites de la pantalla
+    position.x = Clamp(position.x, 0, screen_width - car_width);
+    position.y = Clamp(position.y, 0, screen_height - car_height);
+
+    // Dibujar el coche sin rotación para depuración
+    DrawTexture(car_texture, position.x, position.y);
 
     return UPDATE_CONTINUE;
 }
