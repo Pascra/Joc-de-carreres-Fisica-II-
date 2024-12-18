@@ -135,7 +135,7 @@ bool ModuleGame::Start()
     rick = LoadTexture("Assets/rick_head.png");
     car = LoadTexture("Assets/pitstop_car_3_right.png");
 
-    map = LoadTexture("Assets/circuito.png");
+    map = LoadTexture("Assets/circuitofinal.png");
 
     bonus_fx = App->audio->LoadFx("Assets/bonus.wav");
 
@@ -156,8 +156,8 @@ bool ModuleGame::CleanUp()
 update_status ModuleGame::Update()
 {
     // Dibujar el mapa y el coche
-    DrawTexture(map, 425, 0, WHITE);
-   // DrawTexture(car, 425, 0, WHITE);
+    DrawTexture(map, 250, 170, WHITE);
+    DrawTexture(car, 425, 0, WHITE);
 
     // Alternar el estado del rayo
     if (IsKeyPressed(KEY_SPACE))

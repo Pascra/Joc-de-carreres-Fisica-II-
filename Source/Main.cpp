@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
 			LOG("-------------- Application Creation --------------");
 			App = new Application();
 			state = MAIN_START;
-			break;
+			break;  
 
 		case MAIN_START:
 
