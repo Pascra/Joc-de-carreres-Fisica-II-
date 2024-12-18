@@ -20,14 +20,14 @@ public:
     // Destructor virtual para permitir la herencia
     virtual ~Entity() {}
 
-    
+
     void SetPosition(Vector2 pos) { position = pos; }
     void SetVelocity(Vector2 vel) { velocity = vel; }
     void SetRotation(float rot) { rotation = rot; }
     void SetScale(float scl) { scale = scl; }
     void SetColor(Color clr) { color = clr; }
 
-    
+
     Vector2 GetPosition() const { return position; }
     Vector2 GetVelocity() const { return velocity; }
     float GetRotation() const { return rotation; }
