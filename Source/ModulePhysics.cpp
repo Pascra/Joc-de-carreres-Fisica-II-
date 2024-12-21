@@ -11,7 +11,7 @@ ModulePhysics::ModulePhysics(Application* app, bool start_enabled) : Module(app,
 {
 	world = NULL;
 	mouse_joint = NULL;
-	debug = true;
+	debug = false;
 }
 
 // Destructor
@@ -194,10 +194,9 @@ update_status ModulePhysics::PostUpdate()
 		debug = !debug;
 	}
 
+	// Si debug es false, retornamos inmediatamente
 	if (!debug)
-	{
 		return UPDATE_CONTINUE;
-	}
 
 	b2Body* mouseSelect = nullptr;
 	Vector2 mousePosition = GetMousePosition();
