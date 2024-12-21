@@ -1,3 +1,4 @@
+// Application.h
 #pragma once
 
 #include "Globals.h"
@@ -10,6 +11,7 @@ class ModuleRender;
 class ModuleAudio;
 class ModulePhysics;
 class ModuleGame;
+class ModulePlayer;
 
 class Application
 {
@@ -20,11 +22,12 @@ public:
 	ModuleAudio* audio;
 	ModulePhysics* physics;
 	ModuleGame* scene_intro;
+	ModulePlayer* player;
 
 private:
 
 	std::vector<Module*> list_modules;
-    uint64 frame_count = 0;
+	uint64 frame_count = 0;
 
 	Timer ptimer;
 	Timer startup_time;
