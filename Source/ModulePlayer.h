@@ -4,6 +4,7 @@
 #include "Module.h"
 #include "raylib.h"
 #include "Utils.h"
+#include "ModulePhysics.h"
 
 class ModulePlayer : public Module
 {
@@ -17,10 +18,12 @@ public:
 
 private:
 	Texture2D car_texture;     // Textura del coche
-	Vector2 car_position;      // Posición del coche
-	float car_rotation;        // Rotación del coche
+	Vector2 car_position;      // PosiciÃ³n del coche
+	float car_rotation;        // RotaciÃ³n del coche
 	float speed;               // Velocidad actual del coche
-	float acceleration;        // Aceleración del coche
-	float max_speed;           // Velocidad máxima del coche
+	float acceleration;        // AceleraciÃ³n del coche
+	float max_speed;           // Velocidad mÃ¡xima del coche
 	float handling;            // Manejo del coche (agilidad al girar)
+	PhysBody* car_body;
+	bool debug;
 };

@@ -6,7 +6,7 @@
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
-    : Module(app, start_enabled), car_texture{ 0 }, car_position{ 400.0f, 300.0f }, car_rotation(0.0f), speed(0.0f), acceleration(200.0f), max_speed(400.0f), handling(100.0f)
+    : Module(app, start_enabled), car_texture{ 0 }, car_position{ 400.0f, 300.0f }, car_rotation(0.0f), speed(0.0f), acceleration(200.0f), max_speed(400.0f), handling(100.0f), car_body(nullptr)
 {
 }
 
@@ -16,6 +16,7 @@ ModulePlayer::~ModulePlayer() {}
 // Load assets
 bool ModulePlayer::Start()
 {
+    debug = false;
     LOG("Loading player assets");
 
     car_texture = LoadTexture("Assets/cars/pitstop_car_1.png");
@@ -31,8 +32,13 @@ bool ModulePlayer::Start()
     // Centrar el coche en el mapa considerando la escala
     car_position.x = (754.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
     car_position.y = (426.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
-
-    car_rotation = 0.0f; // Rotaci�n inicial
+    car_body = App->physics->CreateRectangle(
+        car_position.x,
+        car_position.y,
+        car_texture.width * scale * 0.8f,  // Hacer la hitbox un poco más pequeña que el sprite
+        car_texture.height * scale * 0.8f
+    );
+    car_rotation = 0.0f; // Rotación inicial
     speed = 0.0f;        // Velocidad inicial
 
     LOG("Player initialized at position: (%f, %f)", car_position.x, car_position.y);
@@ -43,7 +49,7 @@ bool ModulePlayer::Start()
 
 
 
-// Update: L�gica de movimiento y dibujo del coche
+// Update: Lógica de movimiento y dibujo del coche
 update_status ModulePlayer::Update()
 {
     float delta_time = GetFrameTime();
@@ -55,13 +61,13 @@ update_status ModulePlayer::Update()
         if (speed > max_speed)
             speed = max_speed;
     }
-    else if (IsKeyDown(KEY_S)) // Frenar/marcha atr�s
+    else if (IsKeyDown(KEY_S)) // Frenar/marcha atrás
     {
         speed -= acceleration * delta_time;
-        if (speed < -max_speed / 2) // Velocidad m�xima en reversa es menor
+        if (speed < -max_speed / 2) // Velocidad máxima en reversa es menor
             speed = -max_speed / 2;
     }
-    else // Desaceleraci�n natural
+    else // Desaceleración natural
     {
         speed *= 0.95f; // Reducir velocidad gradualmente
         if (fabs(speed) < 10.0f)
@@ -77,15 +83,20 @@ update_status ModulePlayer::Update()
         car_rotation += handling * delta_time;
     }
 
-    // Ajustar el movimiento para que coincida con la orientaci�n del sprite
+    // Ajustar el movimiento para que coincida con la orientación del sprite
     float adjusted_rotation = car_rotation - 90.0f;
 
-    // Calcular la posici�n del coche sin l�mites
+    // Calcular la posición del coche sin límites
     car_position.x -= cos(adjusted_rotation * DEG2RAD) * speed * delta_time;
     car_position.y -= sin(adjusted_rotation * DEG2RAD) * speed * delta_time;
+    
+    car_body->body->SetTransform(
+        b2Vec2(PIXEL_TO_METERS(car_position.x), PIXEL_TO_METERS(car_position.y)),
+        car_rotation * DEG2RAD
+    );
 
     // Escalar el sprite del coche
-    float scale = 0.2f; // Reducir tama�o del coche al 20% de su tama�o original
+    float scale = 0.2f; // Reducir tamaño del coche al 20% de su tamaño original
 
     // Dibujar el coche con el sprite
     DrawTexturePro(
