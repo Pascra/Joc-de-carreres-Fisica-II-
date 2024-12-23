@@ -48,8 +48,8 @@ bool ModulePlayer::Start()
     car_body = App->physics->CreateRectangle(
         car_position.x,
         car_position.y,
-        car_texture.width * scale * 0.8f,  // Hacer la hitbox un poco más pequeña que el sprite
-        car_texture.height * scale * 0.8f
+        car_texture.width * scale * 0.2f,  // Hacer la hitbox un poco más pequeña que el sprite
+        car_texture.height * scale * 0.2f
     );
     car_rotation = 180.0f;
     speed = 0.0f;
@@ -60,8 +60,8 @@ bool ModulePlayer::Start()
     player2_body = App->physics->CreateRectangle(
         player2_position.x,
         player2_position.y,
-        car_texture2.width * scale * 0.8f,
-        car_texture2.height * scale * 0.8f
+        car_texture2.width * scale * 0.2f,
+        car_texture2.height * scale * 0.2f
     );
     player2_rotation = 180.0f;
     player2_speed = 0.0f;
