@@ -13,6 +13,7 @@
 
 #define METERS_TO_PIXELS(m) ((int) floor(PIXELS_PER_METER * m))
 #define PIXEL_TO_METERS(p)  ((float) METER_PER_PIXEL * p)
+PhysBody* CreateRectangleStatic(int x, int y, int width, int height);
 
 // Small class to return to other modules to track position and rotation of physics bodies
 class PhysBody
@@ -22,7 +23,7 @@ public:
 	{}
 
 	//void GetPosition(int& x, int& y) const;
-	void GetPhysicPosition(int& x, int &y) const;
+	void GetPhysicPosition(int& x, int& y) const;
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;

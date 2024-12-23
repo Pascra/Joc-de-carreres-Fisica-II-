@@ -3,6 +3,7 @@
 #include "Module.h"
 #include "raylib.h"
 #include "Utils.h"
+#include "ModulePhysics.h"
 
 class ModuleGame : public Module
 {
@@ -15,6 +16,5 @@ public:
     bool CleanUp() override;
 
 private:
-    Texture2D map_texture;     // Textura del mapa
-    Texture2D car_texture;
+    Texture2D map_texture; // Textura del mapa
 };

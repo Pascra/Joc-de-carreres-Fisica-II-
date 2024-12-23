@@ -43,27 +43,27 @@ bool ModulePlayer::Start()
     float scale = 0.2f;
 
     // Inicializar jugador 1
-    car_position.x = (754.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
-    car_position.y = (426.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
+    car_position.x = (1920.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
+    car_position.y = (1144.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
     car_body = App->physics->CreateRectangle(
         car_position.x,
         car_position.y,
         car_texture.width * scale * 0.8f,  // Hacer la hitbox un poco más pequeña que el sprite
         car_texture.height * scale * 0.8f
     );
-    car_rotation = 0.0f;
+    car_rotation = 180.0f;
     speed = 0.0f;
 
     // Inicializar jugador 2
-    player2_position.x = 400.0f;
-    player2_position.y = 300.0f;
+    player2_position.x = 862.0f;
+    player2_position.y = 484.0f;
     player2_body = App->physics->CreateRectangle(
         player2_position.x,
         player2_position.y,
         car_texture2.width * scale * 0.8f,
         car_texture2.height * scale * 0.8f
     );
-    player2_rotation = 0.0f;
+    player2_rotation = 180.0f;
     player2_speed = 0.0f;
 
     LOG("Players initialized.");
@@ -157,7 +157,7 @@ update_status ModulePlayer::Update()
     );
 
     // Escalar el sprite de los coches
-    float scale = 0.2f;
+    float scale = 0.06f;
 
     // Dibujar el coche del jugador 1
     DrawTexturePro(
