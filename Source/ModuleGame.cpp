@@ -26,8 +26,20 @@ bool ModuleGame::Start()
     }
 
     LOG("Map texture loaded successfully. Dimensions: %d x %d", map_texture.width, map_texture.height);
-    return true;
 
+    // Crear sensores de puntos de control y línea de meta
+    checkpoint_sensors.push_back(App->physics->CreateRectangleSensor(200, 100, 50, 50)); // Checkpoint 1
+    checkpoint_sensors.push_back(App->physics->CreateRectangleSensor(500, 300, 50, 50)); // Checkpoint 2
+    checkpoint_sensors.push_back(App->physics->CreateRectangleSensor(800, 600, 50, 50)); // Checkpoint 3
+    finish_line = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50, 100, 10); // Línea de meta
+
+    for (auto sensor : checkpoint_sensors)
+    {
+        sensor->listener = this; // Escuchar colisiones
+    }
+    finish_line->listener = this;
+
+    return true;
 }
 
 // Update
@@ -47,6 +59,42 @@ update_status ModuleGame::Update()
     );
 
     return UPDATE_CONTINUE;
+}
+
+// Detectar colisiones
+void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
+{
+    if (sensor == finish_line)
+    {
+        if (current_checkpoint == checkpoint_sensors.size())
+        {
+            laps++;
+            current_checkpoint = 0; // Reiniciar para la siguiente vuelta
+            LOG("Vuelta completada. Vueltas: %d", laps);
+
+            if (laps >= 3)
+            {
+                LOG("¡El coche ha ganado!");
+                // Cambiar estado del juego a victoria
+            }
+        }
+        else
+        {
+            LOG("Vuelta no válida. Completa todos los puntos de control.");
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < checkpoint_sensors.size(); ++i)
+        {
+            if (sensor == checkpoint_sensors[i] && i == current_checkpoint)
+            {
+                current_checkpoint++;
+                LOG("Checkpoint %d alcanzado", (int)i + 1);
+                break;
+            }
+        }
+    }
 }
 
 // Unload assets

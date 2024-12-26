@@ -60,7 +60,7 @@ update_status ModulePhysics::PreUpdate()
 		if (c->GetFixtureA()->IsSensor() && c->IsTouching())
 		{
 			b2BodyUserData data1 = c->GetFixtureA()->GetBody()->GetUserData();
-			b2BodyUserData data2 = c->GetFixtureA()->GetBody()->GetUserData();
+			b2BodyUserData data2 = c->GetFixtureB()->GetBody()->GetUserData();
 
 			PhysBody* pb1 = (PhysBody*)data1.pointer;
 			PhysBody* pb2 = (PhysBody*)data2.pointer;
@@ -69,8 +69,38 @@ update_status ModulePhysics::PreUpdate()
 		}
 	}
 
+	// Debug draw for sensors
+	if (debug)
+	{
+		for (b2Body* body = world->GetBodyList(); body; body = body->GetNext())
+		{
+			for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture = fixture->GetNext())
+			{
+				if (fixture->IsSensor())
+				{
+					b2Shape* shape = fixture->GetShape();
+					if (shape->GetType() == b2Shape::e_polygon)
+					{
+						b2PolygonShape* polygonShape = (b2PolygonShape*)shape;
+						int32 count = polygonShape->m_count;
+
+						b2Vec2 prevVertex = body->GetWorldPoint(polygonShape->m_vertices[count - 1]);
+						for (int32 i = 0; i < count; ++i)
+						{
+							b2Vec2 currentVertex = body->GetWorldPoint(polygonShape->m_vertices[i]);
+							DrawLine(METERS_TO_PIXELS(prevVertex.x), METERS_TO_PIXELS(prevVertex.y), METERS_TO_PIXELS(currentVertex.x), METERS_TO_PIXELS(currentVertex.y), GREEN);
+							prevVertex = currentVertex;
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 	return UPDATE_CONTINUE;
 }
+
 
 PhysBody* ModulePhysics::CreateCircle(int x, int y, int radius)
 {
@@ -409,3 +439,4 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 	if (physB && physB->listener != NULL)
 		physB->listener->OnCollision(physB, physA);
 }
+

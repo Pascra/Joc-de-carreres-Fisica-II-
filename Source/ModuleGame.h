@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "Utils.h"
 #include "ModulePhysics.h"
+#include <vector>
 
 class ModuleGame : public Module
 {
@@ -15,6 +16,12 @@ public:
     update_status Update() override;
     bool CleanUp() override;
 
+    void OnCollision(PhysBody* sensor, PhysBody* other);
+
 private:
     Texture2D map_texture; // Textura del mapa
+    std::vector<PhysBody*> checkpoint_sensors; // Lista de sensores
+    PhysBody* finish_line; // Sensor de la línea de meta
+    int current_checkpoint = 0; // Progreso en los checkpoints
+    int laps = 0; // Contador de vueltas
 };
