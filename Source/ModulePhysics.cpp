@@ -427,16 +427,24 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& no
 
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
-	b2BodyUserData dataA = contact->GetFixtureA()->GetBody()->GetUserData();
-	b2BodyUserData dataB = contact->GetFixtureB()->GetBody()->GetUserData();
+	b2Fixture* fixtureA = contact->GetFixtureA();
+	b2Fixture* fixtureB = contact->GetFixtureB();
 
-	PhysBody* physA = (PhysBody*)dataA.pointer;
-	PhysBody* physB = (PhysBody*)dataB.pointer;
+	b2BodyUserData userDataA = fixtureA->GetBody()->GetUserData();
+	b2BodyUserData userDataB = fixtureB->GetBody()->GetUserData();
 
-	if (physA && physA->listener != NULL)
+	PhysBody* physA = (PhysBody*)userDataA.pointer;
+	PhysBody* physB = (PhysBody*)userDataB.pointer;
+
+	if (physA && physA->listener)
+	{
 		physA->listener->OnCollision(physA, physB);
+	}
 
-	if (physB && physB->listener != NULL)
+	if (physB && physB->listener)
+	{
 		physB->listener->OnCollision(physB, physA);
+	}
 }
+
 

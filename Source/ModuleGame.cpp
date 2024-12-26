@@ -5,7 +5,7 @@
 
 // Constructor
 ModuleGame::ModuleGame(Application* app, bool start_enabled)
-    : Module(app, start_enabled), map_texture{ 0 }
+    : Module(app, start_enabled), map_texture{ 0 }, current_checkpoint(0), laps(0)
 {
 }
 
@@ -64,43 +64,65 @@ update_status ModuleGame::Update()
 // Detectar colisiones
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
 {
-    if (sensor == finish_line)
+    LOG("¡El coche ha ganado!");
+        
+    // Validar si el sensor es parte de la lista de sensores
+    if (std::find(checkpoint_sensors.begin(), checkpoint_sensors.end(), sensor) != checkpoint_sensors.end() || sensor == finish_line)
     {
-        if (current_checkpoint == checkpoint_sensors.size())
+        LOG("¡El coche ha ganado!");
+        // Procesar colisión
+        if (sensor == finish_line)
         {
-            laps++;
-            current_checkpoint = 0; // Reiniciar para la siguiente vuelta
-            LOG("Vuelta completada. Vueltas: %d", laps);
-
-            if (laps >= 3)
+            if (current_checkpoint == checkpoint_sensors.size())
             {
-                LOG("¡El coche ha ganado!");
-                // Cambiar estado del juego a victoria
+                laps++;
+                current_checkpoint = 0; // Reiniciar para la siguiente vuelta
+                LOG("Vuelta completada. Vueltas: %d", laps);
+
+                if (laps >= 3)
+                {
+                    LOG("¡El coche ha ganado!");
+                    // Cambiar estado del juego a victoria
+                }
+            }
+            else
+            {
+                LOG("Vuelta no válida. Completa todos los puntos de control.");
             }
         }
         else
         {
-            LOG("Vuelta no válida. Completa todos los puntos de control.");
+            for (size_t i = 0; i < checkpoint_sensors.size(); ++i)
+            {
+                if (sensor == checkpoint_sensors[i] && i == current_checkpoint)
+                {
+                    current_checkpoint++;
+                    LOG("Checkpoint %d alcanzado", (int)i + 1);
+                    break;
+                }
+            }
         }
     }
     else
     {
-        for (size_t i = 0; i < checkpoint_sensors.size(); ++i)
-        {
-            if (sensor == checkpoint_sensors[i] && i == current_checkpoint)
-            {
-                current_checkpoint++;
-                LOG("Checkpoint %d alcanzado", (int)i + 1);
-                break;
-            }
-        }
+        LOG("Sensor no reconocido.");
     }
 }
+
 
 // Unload assets
 bool ModuleGame::CleanUp()
 {
     LOG("Unloading game assets");
+
+    for (auto sensor : checkpoint_sensors)
+    {
+        delete sensor; // Asegúrate de liberar memoria si es necesario
+    }
+    checkpoint_sensors.clear();
+
+    delete finish_line; // Libera la línea de meta
+
     UnloadTexture(map_texture);
     return true;
 }
