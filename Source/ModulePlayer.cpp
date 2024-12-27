@@ -3,7 +3,7 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
-#include "ModuleItem.h"
+
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
@@ -191,58 +191,4 @@ bool ModulePlayer::CleanUp()
     UnloadTexture(car_texture);
     UnloadTexture(car_texture2);
     return true;
-}
-void ModulePlayer::BoostPlayer1(PhysBody* bodyA, PhysBody* bodyB)
-{
-    item->boost_timer.Start();
-    speed *= 100.0f;
-    item->boost_active = true;
-    if (item->boost_active == true && item->boost_timer.ReadSec() >= 1.0f)
-    {
-        EndBoostPlayer1(bodyA, bodyB);
-    }
-}
-void ModulePlayer::EndBoostPlayer1(PhysBody* bodyA, PhysBody* bodyB)
-{
-    speed = 0.0f;
-}
-
-void ModulePlayer::BoostPlayer2(PhysBody* bodyA, PhysBody* bodyB)
-{
-    item->boost_timer.Start();
-    speed *= 100.0f;
-    item->boost_active = true;
-    if (item->boost_active == true && item->boost_timer.ReadSec() >= 1.0f)
-    {
-        EndBoostPlayer2(bodyA, bodyB);
-    }
-}
-void ModulePlayer::EndBoostPlayer2(PhysBody* bodyA, PhysBody* bodyB)
-{
-    player2_speed = 0.0f;
-}
-void ModulePlayer::OnCollision(PhysBody* bodyA, PhysBody* bodyB) {
-    if (bodyA->ctype == PLAYER1 && bodyB->ctype == ITEM ||
-        bodyB->ctype == PLAYER1 && bodyA->ctype == ITEM)
-    {
-        if (item->is_visible)
-        {
-            item->is_visible == false;
-            item->needs_respawn == true;
-            item->respawn_timer.Start();
-            BoostPlayer1(bodyA, bodyB);
-        }
-    }
-
-    if (bodyA->ctype == PLAYER2 && bodyB->ctype == ITEM ||
-        bodyB->ctype == PLAYER2 && bodyA->ctype == ITEM)
-    {
-        if (item->is_visible)
-        {
-            item->is_visible == false;
-            item->needs_respawn == true;
-            item->respawn_timer.Start();
-            BoostPlayer2(bodyA, bodyB);
-        }
-    }
 }
