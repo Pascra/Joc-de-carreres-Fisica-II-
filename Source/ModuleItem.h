@@ -27,7 +27,7 @@ public:
     update_status Update() override;
     bool CleanUp() override;
     /*void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
-    void EndOnCollision(PhysBody* bodyA, PhysBody* bodyB);*/
+    void EndOnCollision(PhysBody* bodyA, PhysBody* bodyB);
 
 public:
     void RespawnItem();
