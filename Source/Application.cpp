@@ -18,6 +18,7 @@ Application::Application()
     scene_intro = new ModuleGame(this);
     player = new ModulePlayer(this);
 
+
     // The order of calls is very important!
     // Modules will Init() Start() and Update in this order
     // They will CleanUp() in reverse order
@@ -30,7 +31,6 @@ Application::Application()
     // Scene Modules
     AddModule(scene_intro); // Fondo
     AddModule(player);      // Coche
-
     // Rendering happens at the end
     AddModule(renderer);
 }

@@ -4,13 +4,14 @@
 #include "ModuleRender.h"
 #include "Globals.h"
 
+
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     : Module(app, start_enabled), car_texture{ 0 }, car_texture2{ 0 },
     car_position{ 400.0f, 300.0f }, player2_position{ 300.0f, 200.0f },
     car_rotation(0.0f), player2_rotation(0.0f),
     speed(0.0f), player2_speed(0.0f),
-    acceleration(200.0f), max_speed(400.0f), handling(100.0f), car_body(nullptr), player2_body(nullptr)
+    acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr)
 {
 }
 
@@ -20,6 +21,7 @@ ModulePlayer::~ModulePlayer() {}
 // Load assets
 bool ModulePlayer::Start()
 {
+
     debug = false;
     LOG("Loading player assets");
 

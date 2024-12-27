@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "ModulePhysics.h"
+#include <iostream>
 
 #include "p2Point.h"
 
@@ -21,35 +22,35 @@ ModulePhysics::~ModulePhysics()
 
 bool ModulePhysics::Start()
 {
-	LOG("Creating Physics 2D environment");
+	TraceLog(LOG_INFO, "Creating Physics 2D environment");
 
-	world = new b2World(b2Vec2(GRAVITY_X, -GRAVITY_Y));
+	// Crear el mundo físico con la gravedad especificada
+	world = new b2World(b2Vec2(GRAVITY_X, GRAVITY_Y));
+	if (!world)
+	{
+		TraceLog(LOG_ERROR, "Could not create physics world");
+		return false;
+	}
+
+	// Configurar este módulo como listener para colisiones
 	world->SetContactListener(this);
+	TraceLog(LOG_INFO, "Physics world created successfully with contact listener");
 
-	// needed to create joints like mouse joint
+	// Crear un cuerpo base para joints u otros usos
 	b2BodyDef bd;
 	ground = world->CreateBody(&bd);
+	if (!ground)
+	{
+		TraceLog(LOG_ERROR, "Could not create ground body");
+		return false;
+	}
 
-	// big static circle as "ground" in the middle of the screen
-	int x = (int)(SCREEN_WIDTH / 2);
-	int y = (int)(SCREEN_HEIGHT / 1.5f);
-	int diameter = SCREEN_WIDTH / 2;
-
-	//b2BodyDef body;
-	//body.type = b2_staticBody;
-	//body.position.Set(PIXEL_TO_METERS(x), PIXEL_TO_METERS(y));
-
-	//b2Body* big_ball = world->CreateBody(&body);
-
-	//b2CircleShape shape;
-	//shape.m_radius = PIXEL_TO_METERS(diameter) * 0.5f;
-
-	//b2FixtureDef fixture;
-	//fixture.shape = &shape;
-	//big_ball->CreateFixture(&fixture);
+	TraceLog(LOG_INFO, "Ground body created successfully");
 
 	return true;
 }
+
+
 
 update_status ModulePhysics::PreUpdate()
 {
@@ -155,6 +156,8 @@ PhysBody* ModulePhysics::CreateRectangle(int x, int y, int width, int height)
 
 PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int height)
 {
+	LOG("Creating rectangle sensor at (%d, %d) with size (%d, %d)", x, y, width, height);
+
 	PhysBody* pbody = new PhysBody();
 
 	b2BodyDef body;
@@ -163,13 +166,18 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	body.userData.pointer = reinterpret_cast<uintptr_t>(pbody);
 
 	b2Body* b = world->CreateBody(&body);
+	if (!b)
+	{
+		LOG("Failed to create sensor body.");
+		delete pbody;
+		return nullptr;
+	}
 
 	b2PolygonShape box;
 	box.SetAsBox(PIXEL_TO_METERS(width) * 0.5f, PIXEL_TO_METERS(height) * 0.5f);
 
 	b2FixtureDef fixture;
 	fixture.shape = &box;
-	fixture.density = 1.0f;
 	fixture.isSensor = true;
 
 	b->CreateFixture(&fixture);
@@ -178,8 +186,10 @@ PhysBody* ModulePhysics::CreateRectangleSensor(int x, int y, int width, int heig
 	pbody->width = width;
 	pbody->height = height;
 
+	LOG("Sensor created successfully at (%d, %d)", x, y);
 	return pbody;
 }
+
 
 PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 {
@@ -427,6 +437,8 @@ int PhysBody::RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& no
 
 void ModulePhysics::BeginContact(b2Contact* contact)
 {
+	LOG("BeginContact called"); // Mensaje para confirmar que este método se ejecuta
+
 	b2Fixture* fixtureA = contact->GetFixtureA();
 	b2Fixture* fixtureB = contact->GetFixtureB();
 
@@ -438,13 +450,17 @@ void ModulePhysics::BeginContact(b2Contact* contact)
 
 	if (physA && physA->listener)
 	{
+		LOG("Calling listener for Fixture A");
 		physA->listener->OnCollision(physA, physB);
 	}
 
 	if (physB && physB->listener)
 	{
+		LOG("Calling listener for Fixture B");
 		physB->listener->OnCollision(physB, physA);
 	}
 }
+
+
 
 

@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include "ModulePhysics.h"
 
+
 class ModulePlayer : public Module
 {
 public:
@@ -14,6 +15,7 @@ public:
     bool Start() override;
     update_status Update() override;
     bool CleanUp() override;
+  
 
 private:
     // Jugador 1
@@ -30,12 +32,13 @@ private:
 
     // Propiedades comunes
     float acceleration;        // Aceleración de ambos coches
-    float max_speed;           // Velocidad máxima de ambos coches
-    float handling;            // Manejo del coche (agilidad al girar)
+    float max_speed;          // Velocidad máxima de ambos coches
+    float handling;           // Manejo del coche (agilidad al girar)
 
     // Cuerpos físicos
-    PhysBody* car_body;        // Cuerpo físico del jugador 1
-    PhysBody* player2_body;    // Cuerpo físico del jugador 2
+    PhysBody* car_body;       // Cuerpo físico del jugador 1
+    PhysBody* player2_body;   // Cuerpo físico del jugador 2
 
-    bool debug;                // Modo depuración
+    bool debug;               // Modo depuración
+    
 };

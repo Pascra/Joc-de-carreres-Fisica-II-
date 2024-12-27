@@ -25,3 +25,10 @@ private:
     int current_checkpoint = 0; // Progreso en los checkpoints
     int laps = 0; // Contador de vueltas
 };
+struct Checkpoint
+{
+    int x;      // Coordenada X del centro
+    int y;      // Coordenada Y del centro
+    int width;  // Ancho del sensor
+    int height; // Altura del sensor
+};
