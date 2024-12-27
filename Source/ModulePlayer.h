@@ -5,8 +5,6 @@
 #include "Utils.h"
 #include "ModulePhysics.h"
 
-// Forward declaration
-class ModuleItem;
 
 class ModulePlayer : public Module
 {
@@ -17,11 +15,7 @@ public:
     bool Start() override;
     update_status Update() override;
     bool CleanUp() override;
-    void BoostPlayer1(PhysBody* bodyA, PhysBody* bodyB);
-    void EndBoostPlayer1(PhysBody* bodyA, PhysBody* bodyB);
-    void BoostPlayer2(PhysBody* bodyA, PhysBody* bodyB);
-    void EndBoostPlayer2(PhysBody* bodyA, PhysBody* bodyB);
-    void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
+  
 
 private:
     // Jugador 1
@@ -46,5 +40,5 @@ private:
     PhysBody* player2_body;   // Cuerpo físico del jugador 2
 
     bool debug;               // Modo depuración
-    ModuleItem* item;         // Puntero al módulo de items
+    
 };
