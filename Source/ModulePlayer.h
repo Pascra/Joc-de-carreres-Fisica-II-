@@ -5,6 +5,9 @@
 #include "Utils.h"
 #include "ModulePhysics.h"
 
+// Forward declaration
+class ModuleItem;
+
 class ModulePlayer : public Module
 {
 public:
@@ -14,6 +17,11 @@ public:
     bool Start() override;
     update_status Update() override;
     bool CleanUp() override;
+    void BoostPlayer1(PhysBody* bodyA, PhysBody* bodyB);
+    void EndBoostPlayer1(PhysBody* bodyA, PhysBody* bodyB);
+    void BoostPlayer2(PhysBody* bodyA, PhysBody* bodyB);
+    void EndBoostPlayer2(PhysBody* bodyA, PhysBody* bodyB);
+    void OnCollision(PhysBody* bodyA, PhysBody* bodyB);
 
 private:
     // Jugador 1
@@ -30,12 +38,13 @@ private:
 
     // Propiedades comunes
     float acceleration;        // Aceleración de ambos coches
-    float max_speed;           // Velocidad máxima de ambos coches
-    float handling;            // Manejo del coche (agilidad al girar)
+    float max_speed;          // Velocidad máxima de ambos coches
+    float handling;           // Manejo del coche (agilidad al girar)
 
     // Cuerpos físicos
-    PhysBody* car_body;        // Cuerpo físico del jugador 1
-    PhysBody* player2_body;    // Cuerpo físico del jugador 2
+    PhysBody* car_body;       // Cuerpo físico del jugador 1
+    PhysBody* player2_body;   // Cuerpo físico del jugador 2
 
-    bool debug;                // Modo depuración
+    bool debug;               // Modo depuración
+    ModuleItem* item;         // Puntero al módulo de items
 };
