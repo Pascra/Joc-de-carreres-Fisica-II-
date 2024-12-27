@@ -12,6 +12,7 @@ class ModuleAudio;
 class ModulePhysics;
 class ModuleGame;
 class ModulePlayer;
+class ModuleItem;
 
 class Application
 {
@@ -23,6 +24,7 @@ public:
 	ModulePhysics* physics;
 	ModuleGame* scene_intro;
 	ModulePlayer* player;
+	ModuleItem* item;
 
 private:
 
@@ -50,3 +52,4 @@ private:
 
 	void AddModule(Module* module);
 };
+
