@@ -28,30 +28,34 @@ bool ModuleGame::Start()
     }
     TraceLog(LOG_INFO, "Map texture loaded successfully. Dimensions: %d x %d", map_texture.width, map_texture.height);
 
-    // Crear sensores de puntos de control
-    std::vector<std::pair<int, int>> checkpoint_positions = {
-        {200, 100}, {500, 300}, {800, 600}
+    // Definiciones de puntos de control con posiciones y tamaños
+    std::vector<Checkpoint> checkpoint_definitions = {
+        {90, 800, 16, 100},  // Checkpoint 1
+        {500, 300, 60, 40},  // Checkpoint 2
+        {800, 600, 70, 30}   // Checkpoint 3
     };
 
-    for (size_t i = 0; i < checkpoint_positions.size(); ++i)
+    // Crear sensores de puntos de control
+    for (const auto& checkpoint : checkpoint_definitions)
     {
         PhysBody* sensor = App->physics->CreateRectangleSensor(
-            checkpoint_positions[i].first, checkpoint_positions[i].second, 50, 50);
+            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height
+        );
 
         if (!sensor)
         {
-            TraceLog(LOG_ERROR, "Failed to create checkpoint sensor %d", (int)i + 1);
+            TraceLog(LOG_ERROR, "Failed to create checkpoint sensor at (%d, %d)", checkpoint.x, checkpoint.y);
             return false;
         }
 
-        sensor->listener = this; // Asignar listener
+        sensor->listener = this; // Asignar listener al sensor
         checkpoint_sensors.push_back(sensor);
-        TraceLog(LOG_INFO, "Checkpoint %d sensor created at (%d, %d)", (int)i + 1,
-            checkpoint_positions[i].first, checkpoint_positions[i].second);
+        TraceLog(LOG_INFO, "Checkpoint sensor created at (%d, %d) with size (%d x %d)",
+            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height);
     }
 
-    // Crear la línea de meta
-    finish_line = App->physics->CreateRectangleSensor(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50, 100, 10);
+    // Crear línea de meta
+    finish_line = App->physics->CreateRectangleSensor(SCREEN_WIDTH - 134, SCREEN_HEIGHT - 600, 100, 16);
     if (!finish_line)
     {
         TraceLog(LOG_ERROR, "Failed to create finish line sensor");
@@ -60,7 +64,7 @@ bool ModuleGame::Start()
     finish_line->listener = this;
     TraceLog(LOG_INFO, "Finish line sensor created at (%d, %d)", SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50);
 
-    // Código de prueba para verificar colisiones
+    // Crear cuerpo de prueba para colisiones
     PhysBody* testBody = App->physics->CreateCircle(400, 300, 20);
     if (testBody)
     {
@@ -75,6 +79,7 @@ bool ModuleGame::Start()
 
     return true;
 }
+
 
 
 
