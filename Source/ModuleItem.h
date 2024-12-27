@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include "Module.h"
 #include "raylib.h"
@@ -8,12 +8,12 @@
 // Forward declaration
 class ModulePlayer;
 
-// Estructura para gestionar la animación
+// Estructura para gestionar la animaciÃ³n
 struct Animation {
-    Rectangle* frames;     // Array de frames de la animación
-    int frame_count;      // Número total de frames
+    Rectangle* frames;     // Array de frames de la animaciÃ³n
+    int frame_count;      // NÃºmero total de frames
     int current_frame;    // Frame actual
-    float frame_speed;    // Velocidad de la animación (segundos por frame)
+    float frame_speed;    // Velocidad de la animaciÃ³n (segundos por frame)
     float accumulated_time; // Tiempo acumulado para el cambio de frame
 };
 
@@ -40,9 +40,9 @@ public:
     bool is_visible;              // Item visibility state
     Timer respawn_timer;          // Timer for respawning
     bool needs_respawn;           // Flag to control respawn
-    Timer boost_timer;            // Timer para controlar la duración del boost
+    Timer boost_timer;            // Timer para controlar la duraciÃ³n del boost
     float respawn_time;
-    bool boost_active;            // Flag para saber si el boost está activo
-    // Animación
-    Animation nitro;              // Estructura de la animación
-};
+    bool boost_active;            // Flag para saber si el boost estÃ¡ activo
+    // AnimaciÃ³n
+    Animation nitro;              // Estructura de la animaciÃ³n
+};*/
