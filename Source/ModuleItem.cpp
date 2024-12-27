@@ -1,4 +1,4 @@
-#include "ModuleItem.h"
+/*#include "ModuleItem.h"
 #include "Application.h"
 #include "ModulePhysics.h"
 #include "ModulePlayer.h"
@@ -13,7 +13,7 @@ ModuleItem::ModuleItem(Application* app, bool start_enabled)
     boost_active(false),
     respawn_time(3.0f)
 {
-    // Inicializar la estructura de animaciÛn
+    // Inicializar la estructura de animaci√≥n
     nitro.frames = nullptr;
     nitro.frame_count = 0;
     nitro.current_frame = 0;
@@ -31,7 +31,7 @@ ModuleItem::~ModuleItem()
 
 void ModuleItem::InitializeAnimation()
 {
-    // Configurar los frames de la animaciÛn
+    // Configurar los frames de la animaci√≥n
     // Asumiendo que el spritesheet tiene 6 frames horizontales
     nitro.frame_count = 7;
     nitro.frames = new Rectangle[nitro.frame_count];
@@ -39,7 +39,7 @@ void ModuleItem::InitializeAnimation()
     float frame_width = (float)item_texture.width / nitro.frame_count;
     float frame_height = (float)item_texture.height;
 
-    // Definir los rect·ngulos de cada frame
+    // Definir los rect√°ngulos de cada frame
     for (int i = 0; i < nitro.frame_count; i++)
     {
         nitro.frames[i].x = i * frame_width;
@@ -170,6 +170,6 @@ bool ModuleItem::CleanUp()
         nitro.frames = nullptr;
     }
     return true;
-}
+}*/
 
 
