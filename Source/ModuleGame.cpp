@@ -30,9 +30,19 @@ bool ModuleGame::Start()
 
     // Definiciones de puntos de control con posiciones y tamaños
     std::vector<Checkpoint> checkpoint_definitions = {
-        {90, 800, 16, 100},  // Checkpoint 1
-        {500, 300, 60, 40},  // Checkpoint 2
-        {800, 600, 70, 30}   // Checkpoint 3
+        {670, 60, 16, 100},  // Checkpoint 1
+        {150, 130, 100, 16},  // Checkpoint 2...
+        {400, 382, 16, 100},   
+        {585, 190, 16, 100},
+    { 645, 382, 100, 16 },
+    {400, 616, 16, 100},
+    {78, 540,90, 16},
+    {210, 455, 16, 100},
+    { 348, 560,90, 16 },
+     { 344, 670,90, 16 },
+    { 220, 880,90, 16 },
+    {780, 960, 16, 100},
+    { 887, 598, 100, 16 }
     };
 
     // Crear sensores de puntos de control
@@ -64,18 +74,7 @@ bool ModuleGame::Start()
     finish_line->listener = this;
     TraceLog(LOG_INFO, "Finish line sensor created at (%d, %d)", SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50);
 
-    // Crear cuerpo de prueba para colisiones
-    PhysBody* testBody = App->physics->CreateCircle(400, 300, 20);
-    if (testBody)
-    {
-        testBody->body->SetType(b2_dynamicBody);
-        testBody->body->SetLinearVelocity(b2Vec2(5, 0)); // Mover el cuerpo hacia la derecha
-        TraceLog(LOG_INFO, "Test body created at (400, 300) and moving right.");
-    }
-    else
-    {
-        TraceLog(LOG_WARNING, "Failed to create test body for collision testing");
-    }
+   
 
     return true;
 }
