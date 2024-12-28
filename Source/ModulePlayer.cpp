@@ -1,9 +1,7 @@
-// ModulePlayer.cpp
 #include "ModulePlayer.h"
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
-
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
@@ -21,7 +19,6 @@ ModulePlayer::~ModulePlayer() {}
 // Load assets
 bool ModulePlayer::Start()
 {
-
     debug = false;
     LOG("Loading player assets");
 
@@ -191,4 +188,20 @@ bool ModulePlayer::CleanUp()
     UnloadTexture(car_texture);
     UnloadTexture(car_texture2);
     return true;
+}
+
+// Métodos públicos para obtener datos
+Vector2 ModulePlayer::GetCarPosition() const
+{
+    return car_position;
+}
+
+PhysBody* ModulePlayer::GetCarBody() const
+{
+    return car_body;
+}
+
+PhysBody* ModulePlayer::GetPlayer2Body() const
+{
+    return player2_body;
 }

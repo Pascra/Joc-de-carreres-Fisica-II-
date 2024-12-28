@@ -15,6 +15,10 @@ public:
     update_status Update() override;
     bool CleanUp() override;
 
+    Vector2 GetCarPosition() const;        // Obtiene la posición del coche del jugador 1
+    PhysBody* GetCarBody() const;          // Obtiene el cuerpo físico del coche del jugador 1
+    PhysBody* GetPlayer2Body() const;      // Obtiene el cuerpo físico del coche del jugador 2
+
 private:
     // Jugador 1
     Texture2D car_texture;     // Textura del coche del jugador 1
@@ -38,12 +42,4 @@ private:
     PhysBody* player2_body;    // Cuerpo físico del jugador 2
 
     bool debug;                // Modo depuración
-
-    // Coche de la IA
-    Texture2D ai_texture;       // Textura del coche de la IA
-    Vector2 ai_position;        // Posición del coche de la IA
-    float ai_rotation;          // Rotación del coche de la IA
-    float ai_speed;             // Velocidad actual del coche de la IA
-    PhysBody* ai_body;          // Cuerpo físico del coche de la IA
-    int current_checkpoint_ai;  // Índice del checkpoint actual que la IA persigue
 };

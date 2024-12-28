@@ -2,19 +2,23 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
-#include <cmath> // Para sqrt, atan2 y funciones trigonométricas
+#include <cmath>
+#include "ModulePlayer.h"
 
 // Constructor
 ModuleGame::ModuleGame(Application* app, bool start_enabled)
     : Module(app, start_enabled),
     map_texture{ 0 },
-    current_checkpoint(0),
-    laps(0),
-    ai_position({ 0.0f, 0.0f }),
+    current_checkpoint_player1(0),
+    laps_player1(0),
+    current_checkpoint_player2(0),
+    laps_player2(0),
+    current_checkpoint_ai(0),
+    laps_ai(0),
+    ai_position({ 913.7f, 471.0f }), // Posición inicial
     ai_rotation(0.0f),
     ai_speed(0.0f),
-    ai_body(nullptr),
-    current_checkpoint_ai(0)
+    ai_body(nullptr)
 {
 }
 
@@ -52,12 +56,14 @@ bool ModuleGame::Start()
     // Crear sensores de puntos de control
     for (const auto& checkpoint : checkpoint_definitions)
     {
-        PhysBody* sensor = App->physics->CreateRectangleSensor(checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height);
+        PhysBody* sensor = App->physics->CreateRectangleSensor(
+            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height);
         if (!sensor)
         {
             TraceLog(LOG_ERROR, "Failed to create checkpoint sensor at (%d, %d)", checkpoint.x, checkpoint.y);
             return false;
         }
+        sensor->listener = this;
         checkpoint_sensors.push_back(sensor);
     }
 
@@ -101,7 +107,7 @@ update_status ModuleGame::Update()
         0.0f,
         WHITE);
 
-    // Movimiento de la IA
+     // Movimiento de la IA
     if (current_checkpoint_ai < checkpoint_sensors.size())
     {
         // Obtener el checkpoint actual
@@ -141,7 +147,7 @@ update_status ModuleGame::Update()
             float target_rotation = atan2(direction_y, direction_x) * RAD2DEG;
 
             // Ajustar rotación progresivamente
-            float rotation_speed = 90.0f * GetFrameTime();
+            float rotation_speed = 130.0f * GetFrameTime();
             if (fabs(target_rotation - ai_rotation) > rotation_speed)
             {
                 if (target_rotation > ai_rotation)
@@ -189,18 +195,76 @@ update_status ModuleGame::Update()
 // OnCollision
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
 {
-    if (sensor == finish_line && other == ai_body)
+    if (sensor == finish_line)
     {
-        TraceLog(LOG_INFO, "IA has crossed the finish line!");
-    }
-    else if (std::find(checkpoint_sensors.begin(), checkpoint_sensors.end(), sensor) != checkpoint_sensors.end())
-    {
-        if (other == ai_body)
+        // Player 1
+        if (other == App->player->GetCarBody() && current_checkpoint_player1 == checkpoint_sensors.size())
         {
-            TraceLog(LOG_INFO, "IA reached a checkpoint!");
+            laps_player1++;
+            current_checkpoint_player1 = 0;
+            TraceLog(LOG_INFO, "Player 1 completed a lap! Total laps: %d", laps_player1);
+            if (laps_player1 >= 3)
+            {
+                TraceLog(LOG_INFO, "Player 1 WINS!");
+                // Lógica adicional si es necesario cuando el Player 1 gana.
+            }
+        }
+
+        // Player 2
+        if (other == App->player->GetPlayer2Body() && current_checkpoint_player2 == checkpoint_sensors.size())
+        {
+            laps_player2++;
+            current_checkpoint_player2 = 0;
+            TraceLog(LOG_INFO, "Player 2 completed a lap! Total laps: %d", laps_player2);
+            if (laps_player2 >= 3)
+            {
+                TraceLog(LOG_INFO, "Player 2 WINS!");
+                // Lógica adicional si es necesario cuando el Player 2 gana.
+            }
+        }
+
+        // IA
+        if (other == ai_body && current_checkpoint_ai == checkpoint_sensors.size())
+        {
+            laps_ai++;
+            current_checkpoint_ai = 0;
+            TraceLog(LOG_INFO, "AI completed a lap! Total laps: %d", laps_ai);
+            if (laps_ai >= 3)
+            {
+                TraceLog(LOG_INFO, "AI WINS!");
+                // Lógica adicional si es necesario cuando la IA gana.
+            }
+        }
+    }
+
+    // Checkpoints
+    auto checkpoint_index = std::find(checkpoint_sensors.begin(), checkpoint_sensors.end(), sensor) - checkpoint_sensors.begin();
+    if (checkpoint_index < checkpoint_sensors.size())
+    {
+        // Player 1
+        if (other == App->player->GetCarBody() && checkpoint_index == current_checkpoint_player1)
+        {
+            current_checkpoint_player1++;
+          
+        }
+
+        // Player 2
+        if (other == App->player->GetPlayer2Body() && checkpoint_index == current_checkpoint_player2)
+        {
+            current_checkpoint_player2++;
+           
+        }
+
+        // IA
+        if (other == ai_body && checkpoint_index == current_checkpoint_ai)
+        {
+            current_checkpoint_ai++;
+            
         }
     }
 }
+
+
 
 // CleanUp
 bool ModuleGame::CleanUp()
@@ -208,15 +272,10 @@ bool ModuleGame::CleanUp()
     TraceLog(LOG_INFO, "Unloading game assets");
 
     for (auto sensor : checkpoint_sensors)
-    {
         delete sensor;
-    }
+
     checkpoint_sensors.clear();
-
     delete finish_line;
-
-    // Liberar textura de la IA
     UnloadTexture(ai_texture);
-
     return true;
 }

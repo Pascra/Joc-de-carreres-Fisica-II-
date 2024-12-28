@@ -37,15 +37,21 @@ private:
     // Línea de meta
     PhysBody* finish_line;
 
-    // Progreso del jugador
-    int current_checkpoint;
-    int laps;
+    // Progreso de los jugadores
+    int current_checkpoint_player1;
+    int laps_player1;
+    int current_checkpoint_player2;
+    int laps_player2;
 
-    // Coche de la IA
+    // Progreso de la IA
     Texture2D ai_texture;       // Textura del coche de la IA
     Vector2 ai_position;        // Posición del coche de la IA
     float ai_rotation;          // Rotación del coche de la IA
     float ai_speed;             // Velocidad actual del coche de la IA
     PhysBody* ai_body;          // Cuerpo físico del coche de la IA
     int current_checkpoint_ai;  // Índice del checkpoint actual que la IA persigue
+    int laps_ai;
+
+    void MoveAI(float deltaTime);
+
 };
