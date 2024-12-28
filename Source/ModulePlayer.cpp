@@ -8,7 +8,8 @@ ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     : Module(app, start_enabled), car_texture{ 0 }, car_texture2{ 0 },
     car_position{ 400.0f, 300.0f }, player2_position{ 300.0f, 200.0f },
     car_rotation(0.0f), player2_rotation(0.0f),
-    speed(0.0f), player2_speed(0.0f),
+    speed(-10.0f), player2_speed(0.0f),
+    speed_boost(1.0f), base_speed_boost(1.0f),
     acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr)
 {
 }
@@ -50,6 +51,7 @@ bool ModulePlayer::Start()
         car_texture.width * scale * 0.2f,  // Hacer la hitbox un poco más pequeña que el sprite
         car_texture.height * scale * 0.2f
     );
+    car_body->ctype = CollisionType::PLAYER1;
     car_rotation = 180.0f;
     speed = 0.0f;
 
@@ -62,6 +64,7 @@ bool ModulePlayer::Start()
         car_texture2.width * scale * 0.2f,
         car_texture2.height * scale * 0.2f
     );
+    player2_body->ctype = CollisionType::PLAYER2;
     player2_rotation = 180.0f;
     player2_speed = 0.0f;
 
@@ -94,7 +97,7 @@ update_status ModulePlayer::Update()
         if (fabs(speed) < 10.0f)
             speed = 0.0f;
     }
-
+    speed *= speed_boost;          // Para el jugador 1
     if (IsKeyDown(KEY_A)) // Girar a la izquierda
     {
         car_rotation -= handling * delta_time;
@@ -123,7 +126,7 @@ update_status ModulePlayer::Update()
         if (fabs(player2_speed) < 10.0f)
             player2_speed = 0.0f;
     }
-
+    player2_speed *= speed_boost;  // Para el jugador 2
     if (IsKeyDown(KEY_LEFT)) // Girar a la izquierda
     {
         player2_rotation -= handling * delta_time;
@@ -204,4 +207,26 @@ PhysBody* ModulePlayer::GetCarBody() const
 PhysBody* ModulePlayer::GetPlayer2Body() const
 {
     return player2_body;
+}
+void ModulePlayer::ApplySpeedBoost(int playerNum)
+{
+    if (playerNum == 1)
+    {
+        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        LOG("Applied speed boost to Player 1");
+    }
+    else if (playerNum == 2)
+    {
+        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        LOG("Applied speed boost to Player 2");
+    }
+}
+
+void ModulePlayer::RestoreSpeedBoost(int playerNum)
+{
+    if (playerNum == 1 || playerNum == 2)
+    {
+        speed_boost = base_speed_boost;  // Restaurar a la velocidad base
+        LOG("Restored normal speed");
+    }
 }
