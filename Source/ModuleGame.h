@@ -6,6 +6,15 @@
 #include "ModulePhysics.h"
 #include <vector>
 
+// Estructura para los checkpoints
+struct Checkpoint
+{
+    int x;      // Coordenada X del centro
+    int y;      // Coordenada Y del centro
+    int width;  // Ancho del sensor
+    int height; // Altura del sensor
+};
+
 class ModuleGame : public Module
 {
 public:
@@ -14,21 +23,29 @@ public:
 
     bool Start() override;
     update_status Update() override;
+    void OnCollision(PhysBody* sensor, PhysBody* other) override;
     bool CleanUp() override;
 
-    void OnCollision(PhysBody* sensor, PhysBody* other);
-
 private:
-    Texture2D map_texture; // Textura del mapa
-    std::vector<PhysBody*> checkpoint_sensors; // Lista de sensores
-    PhysBody* finish_line; // Sensor de la línea de meta
-    int current_checkpoint = 0; // Progreso en los checkpoints
-    int laps = 0; // Contador de vueltas
-};
-struct Checkpoint
-{
-    int x;      // Coordenada X del centro
-    int y;      // Coordenada Y del centro
-    int width;  // Ancho del sensor
-    int height; // Altura del sensor
+    // Mapa
+    Texture2D map_texture;
+
+    // Checkpoints
+    std::vector<Checkpoint> checkpoint_definitions; // Lista de checkpoints
+    std::vector<PhysBody*> checkpoint_sensors;      // Sensores físicos de los checkpoints
+
+    // Línea de meta
+    PhysBody* finish_line;
+
+    // Progreso del jugador
+    int current_checkpoint;
+    int laps;
+
+    // Coche de la IA
+    Texture2D ai_texture;       // Textura del coche de la IA
+    Vector2 ai_position;        // Posición del coche de la IA
+    float ai_rotation;          // Rotación del coche de la IA
+    float ai_speed;             // Velocidad actual del coche de la IA
+    PhysBody* ai_body;          // Cuerpo físico del coche de la IA
+    int current_checkpoint_ai;  // Índice del checkpoint actual que la IA persigue
 };

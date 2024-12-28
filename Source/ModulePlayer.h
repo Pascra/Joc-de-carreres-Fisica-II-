@@ -5,7 +5,6 @@
 #include "Utils.h"
 #include "ModulePhysics.h"
 
-
 class ModulePlayer : public Module
 {
 public:
@@ -15,7 +14,6 @@ public:
     bool Start() override;
     update_status Update() override;
     bool CleanUp() override;
-  
 
 private:
     // Jugador 1
@@ -32,13 +30,20 @@ private:
 
     // Propiedades comunes
     float acceleration;        // Aceleración de ambos coches
-    float max_speed;          // Velocidad máxima de ambos coches
-    float handling;           // Manejo del coche (agilidad al girar)
+    float max_speed;           // Velocidad máxima de ambos coches
+    float handling;            // Manejo del coche (agilidad al girar)
 
     // Cuerpos físicos
-    PhysBody* car_body;       // Cuerpo físico del jugador 1
-    PhysBody* player2_body;   // Cuerpo físico del jugador 2
+    PhysBody* car_body;        // Cuerpo físico del jugador 1
+    PhysBody* player2_body;    // Cuerpo físico del jugador 2
 
-    bool debug;               // Modo depuración
-    
+    bool debug;                // Modo depuración
+
+    // Coche de la IA
+    Texture2D ai_texture;       // Textura del coche de la IA
+    Vector2 ai_position;        // Posición del coche de la IA
+    float ai_rotation;          // Rotación del coche de la IA
+    float ai_speed;             // Velocidad actual del coche de la IA
+    PhysBody* ai_body;          // Cuerpo físico del coche de la IA
+    int current_checkpoint_ai;  // Índice del checkpoint actual que la IA persigue
 };
