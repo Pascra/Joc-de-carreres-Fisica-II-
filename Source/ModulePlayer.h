@@ -18,6 +18,8 @@ public:
     Vector2 GetCarPosition() const;        // Obtiene la posición del coche del jugador 1
     PhysBody* GetCarBody() const;          // Obtiene el cuerpo físico del coche del jugador 1
     PhysBody* GetPlayer2Body() const;      // Obtiene el cuerpo físico del coche del jugador 2
+    void ApplySpeedBoost(int playerNum);
+    void RestoreSpeedBoost(int playerNum);
 
 private:
     // Jugador 1
@@ -36,7 +38,9 @@ private:
     float acceleration;        // Aceleración de ambos coches
     float max_speed;           // Velocidad máxima de ambos coches
     float handling;            // Manejo del coche (agilidad al girar)
-
+    float base_speed_boost = 1.0f;    // Velocidad normal
+    float current_speed_boost = 1.0f;  // Velocidad actual del boost
+    float speed_boost;
     // Cuerpos físicos
     PhysBody* car_body;        // Cuerpo físico del jugador 1
     PhysBody* player2_body;    // Cuerpo físico del jugador 2
