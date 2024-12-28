@@ -121,7 +121,7 @@ update_status ModuleGame::Update()
         float distance = sqrt(direction_x * direction_x + direction_y * direction_y);
 
         // Verificar si se ha alcanzado el checkpoint
-        if (distance < 20.0f) // Rango de detección ajustado
+        if (distance < 50.0f) // Rango de detección ajustado
         {
             current_checkpoint_ai++; // Cambiar al siguiente checkpoint
             if (current_checkpoint_ai >= checkpoint_sensors.size())
@@ -134,6 +134,12 @@ update_status ModuleGame::Update()
                 ai_body->body->SetTransform(
                     b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
                     ai_rotation * DEG2RAD);
+                laps_ai++;
+                TraceLog(LOG_INFO, "AI completed lap %d", laps_ai);
+                if (laps_ai >= 3)
+                {
+                    TraceLog(LOG_INFO, "AI WINS!");
+                }
             }
         }
         else // Mover hacia el checkpoint
@@ -223,17 +229,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             }
         }
 
-        // IA
-        if (other == ai_body && current_checkpoint_ai == checkpoint_sensors.size())
-        {
-            laps_ai++;
-            current_checkpoint_ai = 0;
-            TraceLog(LOG_INFO, "AI completed a lap! Total laps: %d", laps_ai);
-            if (laps_ai >= 3)
-            {
-                TraceLog(LOG_INFO, "AI WINS!");
-                // Lógica adicional si es necesario cuando la IA gana.
-            }
+        
         }
     }
 
