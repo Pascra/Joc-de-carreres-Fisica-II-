@@ -69,17 +69,17 @@
     <ClInclude Include="Source\ModuleGame.h">
       <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Entity.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Source\ModuleItem.h">
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\ModulePlayer.h">
-      <Filter>Sources</Filter>
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Entity.h">
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Source\Utils.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\ModuleItem.h">
-      <Filter>Sources</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
