@@ -190,6 +190,7 @@
     <ClInclude Include="Source/p2Point.h" />
     <ClInclude Include="Source\Entity.h" />
     <ClInclude Include="Source\ModuleGame.h" />
+    <ClInclude Include="Source\ModuleItem.h" />
     <ClInclude Include="Source\ModulePlayer.h" />
     <ClInclude Include="Source\Timer.h" />
     <ClInclude Include="Source\Utils.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="Source/ModuleRender.cpp" />
     <ClCompile Include="Source/ModuleWindow.cpp" />
     <ClCompile Include="Source\ModuleGame.cpp" />
+    <ClCompile Include="Source\ModuleItem.cpp" />
     <ClCompile Include="Source\ModulePlayer.cpp" />
     <ClCompile Include="Source\Source.cpp" />
     <ClCompile Include="Source\Timer.cpp" />

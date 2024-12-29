@@ -230,7 +230,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
         }
 
         
-        }
+        
     }
 
     // Checkpoints
