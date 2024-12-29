@@ -24,7 +24,7 @@ public:
 	ModuleGame* scene_intro;
 	ModulePlayer* player;
 	ModuleItem* item;
-
+	ModuleGame* game;
 
 private:
 

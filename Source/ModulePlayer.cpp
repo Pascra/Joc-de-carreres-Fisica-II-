@@ -2,6 +2,7 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
+#include "ModuleGame.h"
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
@@ -102,7 +103,14 @@ update_status ModulePlayer::Update()
             base_speed = 0.0f;
         speed = base_speed * speed_boost;       // Reaplicamos el boost
     }
-
+    if (App->game->IsPlayer1Winner())
+    {
+        return UPDATE_CONTINUE; // No dibujar coches si el jugador 1 ganó
+    }
+    if (App->game->IsGameOver())
+    {
+        return UPDATE_CONTINUE; // Detener el dibujado de los jugadores si el juego ha terminado
+    }
     if (IsKeyDown(KEY_A)) // Girar a la izquierda
     {
         car_rotation -= handling * delta_time;

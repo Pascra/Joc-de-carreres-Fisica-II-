@@ -18,7 +18,8 @@ ModuleGame::ModuleGame(Application* app, bool start_enabled)
     ai_position({ 913.7f, 471.0f }), // Posición inicial
     ai_rotation(0.0f),
     ai_speed(0.0f),
-    ai_body(nullptr)
+    ai_body(nullptr),
+    player1_won(false)
 {
 }
 
@@ -29,6 +30,13 @@ ModuleGame::~ModuleGame() {}
 bool ModuleGame::Start()
 {
     TraceLog(LOG_INFO, "Loading game assets");
+
+    player1_win_texture = LoadTexture("Assets/player1_gana.png");
+    if (player1_win_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load Player 1 win texture!");
+        return false;
+    }
 
     // Cargar la textura del mapa
     map_texture = LoadTexture("Assets/MapaCarreras.png");
@@ -99,7 +107,22 @@ bool ModuleGame::Start()
 // Update
 update_status ModuleGame::Update()
 {
-    // Dibujar el mapa
+   
+
+    if (player1_won)
+    {
+        DrawTexturePro(
+            player1_win_texture,
+            Rectangle{ 0.0f, 0.0f, (float)player1_win_texture.width, (float)player1_win_texture.height },
+            Rectangle{ (float)SCREEN_WIDTH / 2 - player1_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player1_win_texture.height / 2,
+                       (float)player1_win_texture.width, (float)player1_win_texture.height },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
+    }
+     // Dibujar el mapa
     DrawTexturePro(
         map_texture,
         Rectangle{ 0.0f, 0.0f, (float)map_texture.width, (float)map_texture.height },
@@ -107,7 +130,6 @@ update_status ModuleGame::Update()
         Vector2{ 0.0f, 0.0f },
         0.0f,
         WHITE);
-
      // Movimiento de la IA
     if (current_checkpoint_ai < checkpoint_sensors.size())
     {
@@ -217,7 +239,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             if (laps_player1 >= 3)
             {
                 TraceLog(LOG_INFO, "Player 1 WINS!");
-                // Lógica adicional si es necesario cuando el Player 1 gana.
+                player1_won = true;
             }
         }
 
@@ -266,21 +288,6 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
 }
 
 
-
-// CleanUp
-bool ModuleGame::CleanUp()
-{
-    TraceLog(LOG_INFO, "Unloading game assets");
-
-    for (auto sensor : checkpoint_sensors)
-        delete sensor;
-
-    checkpoint_sensors.clear();
-    delete finish_line;
-    UnloadTexture(ai_texture);
-    return true;
-}
-
 void ModuleGame::DrawTime() {
     Vector2 position = { 10.0f, 40.0f };
     float fontSize = 20.0f;  // Reduje el tamaño para que se vea mejor
@@ -296,4 +303,27 @@ void ModuleGame::DrawTime() {
     // Usar DrawText de raylib directamente
     DrawText(TimeText, (int)position.x, (int)position.y, (int)fontSize, color);
 }
+
+bool ModuleGame::CleanUp()
+{
+    TraceLog(LOG_INFO, "Unloading game assets");
+
+    for (auto sensor : checkpoint_sensors)
+    {
+        delete sensor; // Libera sensores
+    }
+    checkpoint_sensors.clear();
+
+    if (finish_line)
+    {
+        delete finish_line; // Libera línea de meta
+        finish_line = nullptr;
+    }
+
+    UnloadTexture(map_texture); // Libera textura del mapa
+    UnloadTexture(ai_texture);  // Libera textura de la IA
+
+    return true;
+}
+
 

@@ -27,7 +27,8 @@ public:
     bool CleanUp() override;
     void DrawTime();
    
-
+    bool IsPlayer1Winner() const { return player1_won; }
+    bool IsGameOver() const { return player1_won; }
 
 private:
     // Mapa
@@ -63,4 +64,9 @@ private:
     float time_lap1;
     float time_lap2;
     float time_lap3;
+
+    Texture2D player1_win_texture; // Textura para el mensaje de victoria del jugador 1
+    bool player1_won = false;      // Bandera para indicar si el jugador 1 ha ganado
+    
+
 };

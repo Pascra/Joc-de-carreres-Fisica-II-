@@ -2,7 +2,7 @@
 #include "Application.h"
 #include "ModulePlayer.h"
 #include "Globals.h"
-
+#include "ModuleGame.h"
 ModuleItem::ModuleItem(Application* app, bool start_enabled) : Module(app, start_enabled),
 item_active(true), respawn_timer(0.0f), respawn_time(5.0f),
 current_frame(0), frames_counter(0), frames_speed(7),
@@ -66,7 +66,10 @@ update_status ModuleItem::Update()
             }
         }
     }
-
+    if (App->game->IsGameOver())
+    {
+        return UPDATE_CONTINUE; // Detener el dibujado de ítems si el juego ha terminado
+    }
     // Si el item está activo, actualizar la animación y dibujarlo
     if (item_active)
     {
