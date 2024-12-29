@@ -11,7 +11,14 @@ ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     car_rotation(0.0f), player2_rotation(0.0f),
     speed(-10.0f), player2_speed(0.0f),
     speed_boost(1.0f), base_speed_boost(1.0f),
-    acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr)
+    acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr),
+    is_drifting(false),
+    drift_factor(0.0f),
+    drift_angle(0.0f),
+    drift_recovery(2.0f),
+    drift_speed_multiplier(0.85f),
+    lateral_velocity(10.0f)
+
 {
 }
 
@@ -119,7 +126,52 @@ update_status ModulePlayer::Update()
     {
         car_rotation += handling * delta_time;
     }
+    if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.4f) // Solo permite derrape a cierta velocidad
+    {
+        if (!is_drifting)
+        {
+            is_drifting = true;
+            drift_factor = 0.0f;
+        }
 
+        // Incrementa el factor de derrape
+        drift_factor = fmin(drift_factor + delta_time * 2.0f, 1.0f);
+        
+
+        // Ajusta el ángulo de derrape basado en la dirección
+        if (IsKeyDown(KEY_A))
+        {
+            speed += 100;
+            drift_angle = -45.0f * drift_factor;
+            lateral_velocity = -speed * 0.3f * drift_factor;
+        }
+        else if (IsKeyDown(KEY_D))
+        {
+            speed += 100;
+            drift_angle = 45.0f * drift_factor;
+            lateral_velocity = speed * 0.3f * drift_factor;
+        }
+
+        // Reduce la velocidad durante el derrape
+        speed *= drift_speed_multiplier;
+    }
+    else
+    {
+        // Recuperación del derrape
+        if (is_drifting)
+        {
+            drift_factor = fmax(0.0f, drift_factor - delta_time * drift_recovery);
+            drift_angle *= drift_factor;
+            lateral_velocity *= drift_factor;
+
+            if (drift_factor <= 0.0f)
+            {
+                is_drifting = false;
+                drift_angle = 0.0f;
+                lateral_velocity = 0.0f;
+            }
+        }
+    }
     if (IsKeyDown(KEY_UP))
     {
         player2_speed += acceleration * delta_time;
@@ -152,16 +204,28 @@ update_status ModulePlayer::Update()
     }
 
     // Ajustar el movimiento para que coincida con la orientación del sprite
-    float adjusted_rotation1 = car_rotation - 90.0f;
+    //float adjusted_rotation1 = car_rotation - 90.0f;
     float adjusted_rotation2 = player2_rotation - 90.0f;
 
-    // Calcular la posición del jugador 1
-    car_position.x -= cos(adjusted_rotation1 * DEG2RAD) * speed * delta_time;
-    car_position.y -= sin(adjusted_rotation1 * DEG2RAD) * speed * delta_time;
+    float total_rotation = car_rotation + drift_angle;
+    float adjusted_rotation = total_rotation - 90.0f;
 
+    // Actualiza la posición incluyendo el movimiento lateral del derrape
+    car_position.x -= cos(adjusted_rotation * DEG2RAD) * speed * delta_time;
+    car_position.y -= sin(adjusted_rotation * DEG2RAD) * speed * delta_time;
+
+    // Añade el movimiento lateral del derrape
+    if (is_drifting)
+    {
+        car_position.x += cos((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+        car_position.y += sin((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+
+    }
+    
+    // Actualiza la transformación del cuerpo físico
     car_body->body->SetTransform(
         b2Vec2(PIXEL_TO_METERS(car_position.x), PIXEL_TO_METERS(car_position.y)),
-        car_rotation * DEG2RAD
+        total_rotation* DEG2RAD
     );
 
     // Calcular la posición del jugador 2

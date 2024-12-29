@@ -41,6 +41,14 @@ private:
     float base_speed_boost = 1.0f;    // Velocidad normal
     float current_speed_boost = 1.0f;  // Velocidad actual del boost
     float speed_boost;
+
+    bool is_drifting;         // Estado de derrape
+    float drift_factor;       // Factor de derrape
+    float drift_angle;        // Ángulo adicional durante el derrape
+    float drift_recovery;     // Velocidad de recuperación del derrape
+    float drift_speed_multiplier; // Multiplicador de velocidad durante el derrape
+    float lateral_velocity;   // Velocidad lateral durante el derrape
+
     // Cuerpos físicos
     PhysBody* car_body;        // Cuerpo físico del jugador 1
     PhysBody* player2_body;    // Cuerpo físico del jugador 2
