@@ -158,6 +158,12 @@ void ModuleItem::OnCollision(PhysBody* body1, PhysBody* body2)
         LOG("Player 2 collected boost!");
         ApplyBoostToPlayer(2);
     }
+    // Ignorar explícitamente las colisiones con la IA
+    else if (other_body->ctype == CollisionType::AI)
+    {
+        LOG("AI collided with item - ignoring");
+        return;
+    }
 }
 
 void ModuleItem::ApplyBoostToPlayer(int playerNum)

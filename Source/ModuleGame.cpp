@@ -86,7 +86,7 @@ bool ModuleGame::Start()
     float hitbox_height = 30.0f; // Ajusta según el tamaño del coche
     ai_body = App->physics->CreateRectangle(ai_position.x, ai_position.y, hitbox_width, hitbox_height);
     ai_body->body->SetType(b2_dynamicBody); // Configurar como cuerpo dinámico
-
+    ai_body->ctype = CollisionType::AI;
     // Ajustar la rotación inicial
     ai_body->body->SetTransform(
         b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
