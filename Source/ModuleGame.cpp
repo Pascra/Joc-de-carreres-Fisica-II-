@@ -91,7 +91,8 @@ bool ModuleGame::Start()
     ai_body->body->SetTransform(
         b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
         ai_rotation * DEG2RAD);
-
+    //Empieza a contar el tiempo
+    time = 0.0f;
     return true;
 }
 
@@ -195,6 +196,10 @@ update_status ModuleGame::Update()
         ai_rotation - 90.0f, // Ajuste de orientación
         WHITE);
 
+    time += GetFrameTime();
+    
+    DrawTime();
+
     return UPDATE_CONTINUE;
 }
 
@@ -275,3 +280,20 @@ bool ModuleGame::CleanUp()
     UnloadTexture(ai_texture);
     return true;
 }
+
+void ModuleGame::DrawTime() {
+    Vector2 position = { 10.0f, 40.0f };
+    float fontSize = 20.0f;  // Reduje el tamaño para que se vea mejor
+    Color color = BLACK;
+
+    char TimeText[20];
+    int minutes = (int)time / 60;
+    int seconds = (int)time % 60;
+
+    // Formato MM:SS
+    snprintf(TimeText, sizeof(TimeText), "Time: %02d:%02d", minutes, seconds);
+
+    // Usar DrawText de raylib directamente
+    DrawText(TimeText, (int)position.x, (int)position.y, (int)fontSize, color);
+}
+

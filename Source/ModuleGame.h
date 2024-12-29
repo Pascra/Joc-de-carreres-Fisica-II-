@@ -25,6 +25,9 @@ public:
     update_status Update() override;
     void OnCollision(PhysBody* sensor, PhysBody* other) override;
     bool CleanUp() override;
+    void DrawTime();
+   
+
 
 private:
     // Mapa
@@ -54,4 +57,10 @@ private:
 
     void MoveAI(float deltaTime);
 
+
+    //Time
+    float time;
+    float time_lap1;
+    float time_lap2;
+    float time_lap3;
 };
