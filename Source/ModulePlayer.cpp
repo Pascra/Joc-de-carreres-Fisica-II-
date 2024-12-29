@@ -78,26 +78,31 @@ update_status ModulePlayer::Update()
 {
     float delta_time = GetFrameTime();
 
-    // Controles para el jugador 1
+    // Para el jugador 1
     if (IsKeyDown(KEY_W)) // Acelerar hacia adelante
     {
         speed += acceleration * delta_time;
         if (speed > max_speed)
             speed = max_speed;
+        speed *= speed_boost;
     }
     else if (IsKeyDown(KEY_S)) // Frenar/marcha atrás
     {
         speed -= acceleration * delta_time;
         if (speed < -max_speed / 2) // Velocidad máxima en reversa es menor
             speed = -max_speed / 2;
+        speed *= speed_boost;
     }
     else // Desaceleración natural
     {
-        speed *= 0.95f;
-        if (fabs(speed) < 10.0f)
-            speed = 0.0f;
+        // Aplicamos la desaceleración antes del boost
+        float base_speed = speed / speed_boost; // Revertimos el boost temporalmente
+        base_speed *= 0.95f;                    // Aplicamos la desaceleración
+        if (fabs(base_speed) < 10.0f)
+            base_speed = 0.0f;
+        speed = base_speed * speed_boost;       // Reaplicamos el boost
     }
-    speed *= speed_boost;          // Para el jugador 1
+
     if (IsKeyDown(KEY_A)) // Girar a la izquierda
     {
         car_rotation -= handling * delta_time;
@@ -107,26 +112,28 @@ update_status ModulePlayer::Update()
         car_rotation += handling * delta_time;
     }
 
-    // Controles para el jugador 2
-    if (IsKeyDown(KEY_UP)) // Acelerar hacia adelante
+    if (IsKeyDown(KEY_UP))
     {
         player2_speed += acceleration * delta_time;
         if (player2_speed > max_speed)
             player2_speed = max_speed;
+        player2_speed *= speed_boost;
     }
-    else if (IsKeyDown(KEY_DOWN)) // Frenar/marcha atrás
+    else if (IsKeyDown(KEY_DOWN))
     {
         player2_speed -= acceleration * delta_time;
-        if (player2_speed < -max_speed / 2) // Velocidad máxima en reversa es menor
+        if (player2_speed < -max_speed / 2)
             player2_speed = -max_speed / 2;
+        player2_speed *= speed_boost;
     }
     else // Desaceleración natural
     {
-        player2_speed *= 0.95f;
-        if (fabs(player2_speed) < 10.0f)
-            player2_speed = 0.0f;
+        float base_speed = player2_speed / speed_boost;
+        base_speed *= 0.95f;
+        if (fabs(base_speed) < 10.0f)
+            base_speed = 0.0f;
+        player2_speed = base_speed * speed_boost;
     }
-    player2_speed *= speed_boost;  // Para el jugador 2
     if (IsKeyDown(KEY_LEFT)) // Girar a la izquierda
     {
         player2_rotation -= handling * delta_time;
