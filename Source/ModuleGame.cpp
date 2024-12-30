@@ -86,7 +86,7 @@ bool ModuleGame::Start()
 
     // Configuración inicial de la IA
     ai_position = { 913.7f, 525.0f }; // Cambia estas coordenadas según lo que desees
-    ai_rotation = 0.0f;             // Rotación inicial hacia la derecha
+    ai_rotation = 180.0f;             // Rotación inicial hacia la derecha
     ai_speed = 0.0f;
 
     // Crear cuerpo físico de la IA
@@ -152,7 +152,7 @@ update_status ModuleGame::Update()
                 // Reiniciar tras completar una vuelta
                 current_checkpoint_ai = 0;
                 ai_speed = 0.0f; // Reiniciar velocidad
-                ai_rotation = 0.0f; // Reiniciar rotación
+                ai_rotation = 180.0f; // Reiniciar rotación
                 ai_position = { 913.7f, 525.0f }; // Reiniciar posición inicial
                 ai_body->body->SetTransform(
                     b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
