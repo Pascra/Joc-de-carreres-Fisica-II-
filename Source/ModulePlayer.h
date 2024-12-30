@@ -5,7 +5,6 @@
 #include "Utils.h"
 #include "ModulePhysics.h"
 
-
 class ModulePlayer : public Module
 {
 public:
@@ -15,7 +14,12 @@ public:
     bool Start() override;
     update_status Update() override;
     bool CleanUp() override;
-  
+
+    Vector2 GetCarPosition() const;        // Obtiene la posición del coche del jugador 1
+    PhysBody* GetCarBody() const;          // Obtiene el cuerpo físico del coche del jugador 1
+    PhysBody* GetPlayer2Body() const;      // Obtiene el cuerpo físico del coche del jugador 2
+    void ApplySpeedBoost(int playerNum);
+    void RestoreSpeedBoost(int playerNum);
 
 private:
     // Jugador 1
@@ -32,13 +36,22 @@ private:
 
     // Propiedades comunes
     float acceleration;        // Aceleración de ambos coches
-    float max_speed;          // Velocidad máxima de ambos coches
-    float handling;           // Manejo del coche (agilidad al girar)
+    float max_speed;           // Velocidad máxima de ambos coches
+    float handling;            // Manejo del coche (agilidad al girar)
+    float base_speed_boost = 1.0f;    // Velocidad normal
+    float current_speed_boost = 1.0f;  // Velocidad actual del boost
+    float speed_boost;
+
+    bool is_drifting;         // Estado de derrape
+    float drift_factor;       // Factor de derrape
+    float drift_angle;        // Ángulo adicional durante el derrape
+    float drift_recovery;     // Velocidad de recuperación del derrape
+    float drift_speed_multiplier; // Multiplicador de velocidad durante el derrape
+    float lateral_velocity;   // Velocidad lateral durante el derrape
 
     // Cuerpos físicos
-    PhysBody* car_body;       // Cuerpo físico del jugador 1
-    PhysBody* player2_body;   // Cuerpo físico del jugador 2
+    PhysBody* car_body;        // Cuerpo físico del jugador 1
+    PhysBody* player2_body;    // Cuerpo físico del jugador 2
 
-    bool debug;               // Modo depuración
-    
+    bool debug;                // Modo depuración
 };

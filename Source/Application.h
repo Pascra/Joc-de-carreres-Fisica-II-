@@ -12,7 +12,7 @@ class ModuleAudio;
 class ModulePhysics;
 class ModuleGame;
 class ModulePlayer;
-
+class ModuleItem;
 class Application
 {
 public:
@@ -23,6 +23,8 @@ public:
 	ModulePhysics* physics;
 	ModuleGame* scene_intro;
 	ModulePlayer* player;
+	ModuleItem* item;
+	ModuleGame* game;
 
 private:
 

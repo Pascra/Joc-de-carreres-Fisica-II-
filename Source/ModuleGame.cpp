@@ -2,12 +2,24 @@
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
-#include <iostream>
-
+#include <cmath>
+#include "ModulePlayer.h"
 
 // Constructor
 ModuleGame::ModuleGame(Application* app, bool start_enabled)
-    : Module(app, start_enabled), map_texture{ 0 }, current_checkpoint(0), laps(0)
+    : Module(app, start_enabled),
+    map_texture{ 0 },
+    current_checkpoint_player1(0),
+    laps_player1(0),
+    current_checkpoint_player2(0),
+    laps_player2(0),
+    current_checkpoint_ai(0),
+    laps_ai(0),
+    ai_position({ 913.7f, 471.0f }), // Posición inicial
+    ai_rotation(0.0f),
+    ai_speed(0.0f),
+    ai_body(nullptr),
+    player1_won(false)
 {
 }
 
@@ -19,6 +31,13 @@ bool ModuleGame::Start()
 {
     TraceLog(LOG_INFO, "Loading game assets");
 
+    player1_win_texture = LoadTexture("Assets/player1_gana.png");
+    if (player1_win_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load Player 1 win texture!");
+        return false;
+    }
+
     // Cargar la textura del mapa
     map_texture = LoadTexture("Assets/MapaCarreras.png");
     if (map_texture.id == 0)
@@ -26,32 +45,34 @@ bool ModuleGame::Start()
         TraceLog(LOG_ERROR, "Failed to load map texture!");
         return false;
     }
-    TraceLog(LOG_INFO, "Map texture loaded successfully. Dimensions: %d x %d", map_texture.width, map_texture.height);
 
-    // Definiciones de puntos de control con posiciones y tamaños
-    std::vector<Checkpoint> checkpoint_definitions = {
-        {90, 800, 16, 100},  // Checkpoint 1
-        {500, 300, 60, 40},  // Checkpoint 2
-        {800, 600, 70, 30}   // Checkpoint 3
+    // Cargar textura del coche de la IA
+    ai_texture = LoadTexture("Assets/cars/pitstop_car_3.png");
+    if (ai_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load AI car texture!");
+        return false;
+    }
+
+    // Definir puntos de control con posiciones y tamaños
+    checkpoint_definitions = {
+       {887, 200, 100, 16}, {750, 60, 16, 100}, {250, 60, 16, 100},{150, 130, 100, 16}, {400, 382, 16, 100}, {585, 190, 16, 100},
+        {645, 382, 100, 16}, {400, 616, 16, 100},{160, 620, 16, 90}, {78, 540, 90, 16}, {210, 455, 16, 100},
+        {348, 560, 90, 16}, {344, 670, 90, 16}, {220, 880, 90, 16}, {780, 960, 16, 100},{887, 860, 100, 16}, {887, 598, 100, 16}
     };
 
     // Crear sensores de puntos de control
     for (const auto& checkpoint : checkpoint_definitions)
     {
         PhysBody* sensor = App->physics->CreateRectangleSensor(
-            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height
-        );
-
+            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height);
         if (!sensor)
         {
             TraceLog(LOG_ERROR, "Failed to create checkpoint sensor at (%d, %d)", checkpoint.x, checkpoint.y);
             return false;
         }
-
-        sensor->listener = this; // Asignar listener al sensor
+        sensor->listener = this;
         checkpoint_sensors.push_back(sensor);
-        TraceLog(LOG_INFO, "Checkpoint sensor created at (%d, %d) with size (%d x %d)",
-            checkpoint.x, checkpoint.y, checkpoint.width, checkpoint.height);
     }
 
     // Crear línea de meta
@@ -62,103 +83,247 @@ bool ModuleGame::Start()
         return false;
     }
     finish_line->listener = this;
-    TraceLog(LOG_INFO, "Finish line sensor created at (%d, %d)", SCREEN_WIDTH / 2, SCREEN_HEIGHT - 50);
 
-    // Crear cuerpo de prueba para colisiones
-    PhysBody* testBody = App->physics->CreateCircle(400, 300, 20);
-    if (testBody)
-    {
-        testBody->body->SetType(b2_dynamicBody);
-        testBody->body->SetLinearVelocity(b2Vec2(5, 0)); // Mover el cuerpo hacia la derecha
-        TraceLog(LOG_INFO, "Test body created at (400, 300) and moving right.");
-    }
-    else
-    {
-        TraceLog(LOG_WARNING, "Failed to create test body for collision testing");
-    }
+    // Configuración inicial de la IA
+    ai_position = { 913.7f, 525.0f }; // Cambia estas coordenadas según lo que desees
+    ai_rotation = 180.0f;             // Rotación inicial hacia la derecha
+    ai_speed = 0.0f;
 
+    // Crear cuerpo físico de la IA
+    float hitbox_width = 50.0f;  // Ajusta según el tamaño del coche
+    float hitbox_height = 30.0f; // Ajusta según el tamaño del coche
+    ai_body = App->physics->CreateRectangle(ai_position.x, ai_position.y, hitbox_width, hitbox_height);
+    ai_body->body->SetType(b2_dynamicBody); // Configurar como cuerpo dinámico
+    ai_body->ctype = CollisionType::AI;
+    // Ajustar la rotación inicial
+    ai_body->body->SetTransform(
+        b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
+        ai_rotation * DEG2RAD);
+    //Empieza a contar el tiempo
+    time = 0.0f;
     return true;
 }
-
-
-
 
 // Update
 update_status ModuleGame::Update()
 {
-    // Escalar el mapa para que ocupe toda la ventana
-    float scale_x = (float)SCREEN_WIDTH / (float)map_texture.width;
-    float scale_y = (float)SCREEN_HEIGHT / (float)map_texture.height;
+    if (player1_won)
+    {
+        DrawTexturePro(
+            player1_win_texture,
+            Rectangle{ 0.0f, 0.0f, (float)player1_win_texture.width, (float)player1_win_texture.height },
+            Rectangle{ (float)SCREEN_WIDTH / 2 - player1_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player1_win_texture.height / 2,
+                       (float)player1_win_texture.width, (float)player1_win_texture.height },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
+    }
 
+    // Dibujar el mapa
     DrawTexturePro(
         map_texture,
-        Rectangle{ 0.0f, 0.0f, (float)map_texture.width, (float)map_texture.height }, // Área fuente
-        Rectangle{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT },         // Área destino
-        Vector2{ 0.0f, 0.0f }, // Sin desplazamiento
-        0.0f,                  // Sin rotación
-        WHITE
-    );
+        Rectangle{ 0.0f, 0.0f, (float)map_texture.width, (float)map_texture.height },
+        Rectangle{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT },
+        Vector2{ 0.0f, 0.0f },
+        0.0f,
+        WHITE);
+
+    // Movimiento de la IA
+    if (current_checkpoint_ai < checkpoint_sensors.size())
+    {
+        // Obtener el checkpoint actual
+        PhysBody* target_checkpoint = checkpoint_sensors[current_checkpoint_ai];
+        int checkpoint_x, checkpoint_y;
+        target_checkpoint->GetPhysicPosition(checkpoint_x, checkpoint_y);
+
+        // Calcular dirección hacia el checkpoint
+        float direction_x = checkpoint_x - ai_position.x;
+        float direction_y = checkpoint_y - ai_position.y;
+        float distance = sqrt(direction_x * direction_x + direction_y * direction_y);
+
+        // Verificar si se ha alcanzado el checkpoint
+        if (distance < 50.0f) // Rango de detección ajustado
+        {
+            current_checkpoint_ai++; // Cambiar al siguiente checkpoint
+            if (current_checkpoint_ai >= checkpoint_sensors.size())
+            {
+                // Reiniciar tras completar una vuelta
+                current_checkpoint_ai = 0;
+                ai_speed = 0.0f; // Reiniciar velocidad
+                ai_rotation = 180.0f; // Reiniciar rotación
+                ai_position = { 913.7f, 525.0f }; // Reiniciar posición inicial
+                ai_body->body->SetTransform(
+                    b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
+                    ai_rotation * DEG2RAD);
+                laps_ai++;
+                TraceLog(LOG_INFO, "AI completed lap %d", laps_ai);
+                if (laps_ai >= 3)
+                {
+                    TraceLog(LOG_INFO, "AI WINS!");
+                }
+            }
+        }
+        else // Mover hacia el checkpoint
+        {
+            direction_x /= distance; // Normalizar el vector dirección
+            direction_y /= distance;
+
+            ai_speed = 250.0f; // Velocidad constante de la IA
+
+            // Calcular la rotación hacia el checkpoint
+            float target_rotation = atan2(direction_y, direction_x) * RAD2DEG;
+
+            // Calcular la diferencia mínima entre el ángulo actual y el objetivo
+            float delta_rotation = fmod(target_rotation - ai_rotation + 360.0f, 360.0f);
+            if (delta_rotation > 180.0f)
+            {
+                delta_rotation -= 360.0f;
+            }
+
+            // Ajustar rotación progresivamente
+            float rotation_speed = 130.0f * GetFrameTime();
+            if (fabs(delta_rotation) > rotation_speed)
+            {
+                ai_rotation += (delta_rotation > 0) ? rotation_speed : -rotation_speed;
+            }
+            else
+            {
+                ai_rotation = target_rotation; // Ajustar directamente si está cerca
+            }
+
+            // Actualizar posición
+            ai_position.x += cos(ai_rotation * DEG2RAD) * ai_speed * GetFrameTime();
+            ai_position.y += sin(ai_rotation * DEG2RAD) * ai_speed * GetFrameTime();
+
+            // Actualizar posición física
+            ai_body->body->SetTransform(
+                b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
+                ai_rotation * DEG2RAD);
+        }
+    }
+
+    // Dibujar la textura de la IA
+    float scale = 0.06f;
+    Vector2 sprite_offset = {
+        (float)ai_texture.width * scale / 2.0f,
+        (float)ai_texture.height * scale / 2.0f };
+
+    DrawTexturePro(
+        ai_texture,
+        Rectangle{ 0.0f, 0.0f, (float)ai_texture.width, (float)ai_texture.height },
+        Rectangle{ ai_position.x, ai_position.y, (float)ai_texture.width * scale, (float)ai_texture.height * scale },
+        sprite_offset,
+        ai_rotation - 90.0f, // Ajuste de orientación
+        WHITE);
+
+    time += GetFrameTime();
+    DrawTime();
 
     return UPDATE_CONTINUE;
 }
 
-// Detectar colisiones
+
+// OnCollision
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
 {
-    TraceLog(LOG_INFO, "Collision detected: sensor=%p, finish_line=%p", sensor, finish_line);
-
     if (sensor == finish_line)
     {
-        TraceLog(LOG_INFO, "Finish line triggered");
-        if (current_checkpoint == checkpoint_sensors.size())
+        // Player 1
+        if (other == App->player->GetCarBody() && current_checkpoint_player1 == checkpoint_sensors.size())
         {
-            laps++;
-            current_checkpoint = 0;
-            TraceLog(LOG_INFO, "Lap completed. Total laps: %d", laps);
+            laps_player1++;
+            current_checkpoint_player1 = 0;
+            TraceLog(LOG_INFO, "Player 1 completed a lap! Total laps: %d", laps_player1);
+            if (laps_player1 >= 3)
+            {
+                TraceLog(LOG_INFO, "Player 1 WINS!");
+                player1_won = true;
+            }
+        }
 
-            if (laps >= 3)
+        // Player 2
+        if (other == App->player->GetPlayer2Body() && current_checkpoint_player2 == checkpoint_sensors.size())
+        {
+            laps_player2++;
+            current_checkpoint_player2 = 0;
+            TraceLog(LOG_INFO, "Player 2 completed a lap! Total laps: %d", laps_player2);
+            if (laps_player2 >= 3)
             {
-                TraceLog(LOG_INFO, "Race completed! Car wins!");
+                TraceLog(LOG_INFO, "Player 2 WINS!");
+                // Lógica adicional si es necesario cuando el Player 2 gana.
             }
         }
-        else
-        {
-            TraceLog(LOG_WARNING, "Invalid lap. Complete all checkpoints.");
-        }
+
+        
+        
     }
-    else if (std::find(checkpoint_sensors.begin(), checkpoint_sensors.end(), sensor) != checkpoint_sensors.end())
+
+    // Checkpoints
+    auto checkpoint_index = std::find(checkpoint_sensors.begin(), checkpoint_sensors.end(), sensor) - checkpoint_sensors.begin();
+    if (checkpoint_index < checkpoint_sensors.size())
     {
-        TraceLog(LOG_INFO, "Checkpoint sensor triggered");
-        for (size_t i = 0; i < checkpoint_sensors.size(); ++i)
+        // Player 1
+        if (other == App->player->GetCarBody() && checkpoint_index == current_checkpoint_player1)
         {
-            if (sensor == checkpoint_sensors[i] && i == current_checkpoint)
-            {
-                current_checkpoint++;
-                TraceLog(LOG_INFO, "Checkpoint %d reached", (int)i + 1);
-                break;
-            }
+            current_checkpoint_player1++;
+          
         }
-    }
-    else
-    {
-        TraceLog(LOG_WARNING, "Unrecognized sensor collision. sensor=%p", sensor);
+
+        // Player 2
+        if (other == App->player->GetPlayer2Body() && checkpoint_index == current_checkpoint_player2)
+        {
+            current_checkpoint_player2++;
+           
+        }
+
+        // IA
+        if (other == ai_body && checkpoint_index == current_checkpoint_ai)
+        {
+            current_checkpoint_ai++;
+            
+        }
     }
 }
 
 
-// Unload assets
+void ModuleGame::DrawTime() {
+    Vector2 position = { 10.0f, 40.0f };
+    float fontSize = 20.0f;  // Reduje el tamaño para que se vea mejor
+    Color color = BLACK;
+
+    char TimeText[20];
+    int minutes = (int)time / 60;
+    int seconds = (int)time % 60;
+
+    // Formato MM:SS
+    snprintf(TimeText, sizeof(TimeText), "Time: %02d:%02d", minutes, seconds);
+
+    // Usar DrawText de raylib directamente
+    DrawText(TimeText, (int)position.x, (int)position.y, (int)fontSize, color);
+}
+
 bool ModuleGame::CleanUp()
 {
-    LOG("Unloading game assets");
+    TraceLog(LOG_INFO, "Unloading game assets");
 
     for (auto sensor : checkpoint_sensors)
     {
-        delete sensor; // Asegúrate de liberar memoria si es necesario
+        delete sensor; // Libera sensores
     }
     checkpoint_sensors.clear();
 
-    delete finish_line; // Libera la línea de meta
+    if (finish_line)
+    {
+        delete finish_line; // Libera línea de meta
+        finish_line = nullptr;
+    }
 
-    UnloadTexture(map_texture);
+    UnloadTexture(map_texture); // Libera textura del mapa
+    UnloadTexture(ai_texture);  // Libera textura de la IA
+
     return true;
 }
+
+

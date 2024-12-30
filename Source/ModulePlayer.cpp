@@ -1,17 +1,24 @@
-// ModulePlayer.cpp
 #include "ModulePlayer.h"
 #include "Application.h"
 #include "ModuleRender.h"
 #include "Globals.h"
-
+#include "ModuleGame.h"
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     : Module(app, start_enabled), car_texture{ 0 }, car_texture2{ 0 },
     car_position{ 400.0f, 300.0f }, player2_position{ 300.0f, 200.0f },
     car_rotation(0.0f), player2_rotation(0.0f),
-    speed(0.0f), player2_speed(0.0f),
-    acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr)
+    speed(-10.0f), player2_speed(0.0f),
+    speed_boost(1.0f), base_speed_boost(1.0f),
+    acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr),
+    is_drifting(false),
+    drift_factor(0.0f),
+    drift_angle(0.0f),
+    drift_recovery(2.0f),
+    drift_speed_multiplier(0.85f),
+    lateral_velocity(10.0f)
+
 {
 }
 
@@ -21,7 +28,6 @@ ModulePlayer::~ModulePlayer() {}
 // Load assets
 bool ModulePlayer::Start()
 {
-
     debug = false;
     LOG("Loading player assets");
 
@@ -53,6 +59,7 @@ bool ModulePlayer::Start()
         car_texture.width * scale * 0.2f,  // Hacer la hitbox un poco más pequeña que el sprite
         car_texture.height * scale * 0.2f
     );
+    car_body->ctype = CollisionType::PLAYER1;
     car_rotation = 180.0f;
     speed = 0.0f;
 
@@ -65,6 +72,7 @@ bool ModulePlayer::Start()
         car_texture2.width * scale * 0.2f,
         car_texture2.height * scale * 0.2f
     );
+    player2_body->ctype = CollisionType::PLAYER2;
     player2_rotation = 180.0f;
     player2_speed = 0.0f;
 
@@ -78,26 +86,38 @@ update_status ModulePlayer::Update()
 {
     float delta_time = GetFrameTime();
 
-    // Controles para el jugador 1
+    // Para el jugador 1
     if (IsKeyDown(KEY_W)) // Acelerar hacia adelante
     {
         speed += acceleration * delta_time;
         if (speed > max_speed)
             speed = max_speed;
+        speed *= speed_boost;
     }
     else if (IsKeyDown(KEY_S)) // Frenar/marcha atrás
     {
         speed -= acceleration * delta_time;
         if (speed < -max_speed / 2) // Velocidad máxima en reversa es menor
             speed = -max_speed / 2;
+        speed *= speed_boost;
     }
     else // Desaceleración natural
     {
-        speed *= 0.95f;
-        if (fabs(speed) < 10.0f)
-            speed = 0.0f;
+        // Aplicamos la desaceleración antes del boost
+        float base_speed = speed / speed_boost; // Revertimos el boost temporalmente
+        base_speed *= 0.95f;                    // Aplicamos la desaceleración
+        if (fabs(base_speed) < 10.0f)
+            base_speed = 0.0f;
+        speed = base_speed * speed_boost;       // Reaplicamos el boost
     }
-
+    if (App->game->IsPlayer1Winner())
+    {
+        return UPDATE_CONTINUE; // No dibujar coches si el jugador 1 ganó
+    }
+    if (App->game->IsGameOver())
+    {
+        return UPDATE_CONTINUE; // Detener el dibujado de los jugadores si el juego ha terminado
+    }
     if (IsKeyDown(KEY_A)) // Girar a la izquierda
     {
         car_rotation -= handling * delta_time;
@@ -106,27 +126,74 @@ update_status ModulePlayer::Update()
     {
         car_rotation += handling * delta_time;
     }
+    if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.4f) // Solo permite derrape a cierta velocidad
+    {
+        if (!is_drifting)
+        {
+            is_drifting = true;
+            drift_factor = 0.0f;
+        }
 
-    // Controles para el jugador 2
-    if (IsKeyDown(KEY_UP)) // Acelerar hacia adelante
+        // Incrementa el factor de derrape
+        drift_factor = fmin(drift_factor + delta_time * 2.0f, 1.0f);
+        
+
+        // Ajusta el ángulo de derrape basado en la dirección
+        if (IsKeyDown(KEY_A))
+        {
+            speed += 100;
+            drift_angle = -45.0f * drift_factor;
+            lateral_velocity = -speed * 0.3f * drift_factor;
+        }
+        else if (IsKeyDown(KEY_D))
+        {
+            speed += 100;
+            drift_angle = 45.0f * drift_factor;
+            lateral_velocity = speed * 0.3f * drift_factor;
+        }
+
+        // Reduce la velocidad durante el derrape
+        speed *= drift_speed_multiplier;
+    }
+    else
+    {
+        // Recuperación del derrape
+        if (is_drifting)
+        {
+            drift_factor = fmax(0.0f, drift_factor - delta_time * drift_recovery);
+            drift_angle *= drift_factor;
+            lateral_velocity *= drift_factor;
+
+            if (drift_factor <= 0.0f)
+            {
+                is_drifting = false;
+                drift_angle = 0.0f;
+                lateral_velocity = 0.0f;
+            }
+        }
+    }
+    if (IsKeyDown(KEY_UP))
     {
         player2_speed += acceleration * delta_time;
         if (player2_speed > max_speed)
             player2_speed = max_speed;
+        player2_speed *= speed_boost;
     }
-    else if (IsKeyDown(KEY_DOWN)) // Frenar/marcha atrás
+    else if (IsKeyDown(KEY_DOWN))
     {
         player2_speed -= acceleration * delta_time;
-        if (player2_speed < -max_speed / 2) // Velocidad máxima en reversa es menor
+        if (player2_speed < -max_speed / 2)
             player2_speed = -max_speed / 2;
+        player2_speed *= speed_boost;
     }
     else // Desaceleración natural
     {
-        player2_speed *= 0.95f;
-        if (fabs(player2_speed) < 10.0f)
-            player2_speed = 0.0f;
+        float base_speed = player2_speed / speed_boost;
+        base_speed *= 0.95f;
+        if (fabs(base_speed) < 10.0f)
+            base_speed = 0.0f;
+        player2_speed = base_speed * speed_boost;
     }
-
     if (IsKeyDown(KEY_LEFT)) // Girar a la izquierda
     {
         player2_rotation -= handling * delta_time;
@@ -137,16 +204,28 @@ update_status ModulePlayer::Update()
     }
 
     // Ajustar el movimiento para que coincida con la orientación del sprite
-    float adjusted_rotation1 = car_rotation - 90.0f;
+    //float adjusted_rotation1 = car_rotation - 90.0f;
     float adjusted_rotation2 = player2_rotation - 90.0f;
 
-    // Calcular la posición del jugador 1
-    car_position.x -= cos(adjusted_rotation1 * DEG2RAD) * speed * delta_time;
-    car_position.y -= sin(adjusted_rotation1 * DEG2RAD) * speed * delta_time;
+    float total_rotation = car_rotation + drift_angle;
+    float adjusted_rotation = total_rotation - 90.0f;
 
+    // Actualiza la posición incluyendo el movimiento lateral del derrape
+    car_position.x -= cos(adjusted_rotation * DEG2RAD) * speed * delta_time;
+    car_position.y -= sin(adjusted_rotation * DEG2RAD) * speed * delta_time;
+
+    // Añade el movimiento lateral del derrape
+    if (is_drifting)
+    {
+        car_position.x += cos((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+        car_position.y += sin((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+
+    }
+    
+    // Actualiza la transformación del cuerpo físico
     car_body->body->SetTransform(
         b2Vec2(PIXEL_TO_METERS(car_position.x), PIXEL_TO_METERS(car_position.y)),
-        car_rotation * DEG2RAD
+        total_rotation* DEG2RAD
     );
 
     // Calcular la posición del jugador 2
@@ -191,4 +270,42 @@ bool ModulePlayer::CleanUp()
     UnloadTexture(car_texture);
     UnloadTexture(car_texture2);
     return true;
+}
+
+// Métodos públicos para obtener datos
+Vector2 ModulePlayer::GetCarPosition() const
+{
+    return car_position;
+}
+
+PhysBody* ModulePlayer::GetCarBody() const
+{
+    return car_body;
+}
+
+PhysBody* ModulePlayer::GetPlayer2Body() const
+{
+    return player2_body;
+}
+void ModulePlayer::ApplySpeedBoost(int playerNum)
+{
+    if (playerNum == 1)
+    {
+        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        LOG("Applied speed boost to Player 1");
+    }
+    else if (playerNum == 2)
+    {
+        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        LOG("Applied speed boost to Player 2");
+    }
+}
+
+void ModulePlayer::RestoreSpeedBoost(int playerNum)
+{
+    if (playerNum == 1 || playerNum == 2)
+    {
+        speed_boost = base_speed_boost;  // Restaurar a la velocidad base
+        LOG("Restored normal speed");
+    }
 }

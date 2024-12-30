@@ -6,7 +6,7 @@
 #include "ModulePhysics.h"
 #include "ModuleGame.h"
 #include "ModulePlayer.h"
-
+#include "ModuleItem.h"
 #include "Application.h"
 
 Application::Application()
@@ -17,7 +17,8 @@ Application::Application()
     physics = new ModulePhysics(this);
     scene_intro = new ModuleGame(this);
     player = new ModulePlayer(this);
-
+    item = new ModuleItem(this);
+    game = new ModuleGame(this, true);
 
     // The order of calls is very important!
     // Modules will Init() Start() and Update in this order
@@ -31,19 +32,38 @@ Application::Application()
     // Scene Modules
     AddModule(scene_intro); // Fondo
     AddModule(player);      // Coche
+    AddModule(item);
+
     // Rendering happens at the end
     AddModule(renderer);
 }
 
 Application::~Application()
 {
+    TraceLog(LOG_INFO, "Shutting down application...");
+
+    // Limpiar todos los módulos en orden inverso
     for (auto it = list_modules.rbegin(); it != list_modules.rend(); ++it)
     {
         Module* item = *it;
-        delete item;
+        TraceLog(LOG_INFO, "Deleting module: %p", item);
+        delete item; // Elimina cada módulo
+        *it = nullptr; // Establece el puntero a nullptr (opcional, si no se va a usar después)
     }
+
+    // Si `game` no está en la lista de módulos, elimínalo por separado
+    if (game)
+    {
+        TraceLog(LOG_INFO, "Deleting game module.");
+        delete game;
+        game = nullptr; // Limpia el puntero de `game`
+    }
+
+    // Limpiar la lista
     list_modules.clear();
+    TraceLog(LOG_INFO, "Application shutdown complete.");
 }
+
 
 bool Application::Init()
 {

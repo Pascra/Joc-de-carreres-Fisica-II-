@@ -19,6 +19,7 @@ enum CollisionType
 	PLAYER1,
 	PLAYER2,
 	ITEM,
+	AI,
 	UNKNOWN = 0
 };
 
