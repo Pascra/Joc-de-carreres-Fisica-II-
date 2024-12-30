@@ -18,7 +18,6 @@ _IMPORTANT: do not modify, change or add any folder or file as you might not be 
 ~~~~~~~~~~~~~~~
 
 Usual controls:
-
  Player 1;                    Player 2;
 W Key (up)                 UP_ARROW (up)   
 A Key (left)               LEFT_ARROW (left)
