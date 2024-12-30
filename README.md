@@ -68,7 +68,7 @@ _Roger Miralles and Github account_
 _Pau Gutsens and Github account_
 
 * Design / Code / Art
-* [Github account]
+* [Github account](https://github.com/PauGutsens)
 
 
 
