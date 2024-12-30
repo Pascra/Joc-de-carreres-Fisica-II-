@@ -56,9 +56,9 @@ bool ModuleGame::Start()
 
     // Definir puntos de control con posiciones y tamaños
     checkpoint_definitions = {
-        {670, 60, 16, 100}, {150, 130, 100, 16}, {400, 382, 16, 100}, {585, 190, 16, 100},
-        {645, 382, 100, 16}, {400, 616, 16, 100}, {78, 540, 90, 16}, {210, 455, 16, 100},
-        {348, 560, 90, 16}, {344, 670, 90, 16}, {220, 880, 90, 16}, {780, 960, 16, 100}, {887, 598, 100, 16}
+       {887, 200, 100, 16}, {750, 60, 16, 100}, {250, 60, 16, 100},{150, 130, 100, 16}, {400, 382, 16, 100}, {585, 190, 16, 100},
+        {645, 382, 100, 16}, {400, 616, 16, 100},{160, 620, 16, 90}, {78, 540, 90, 16}, {210, 455, 16, 100},
+        {348, 560, 90, 16}, {344, 670, 90, 16}, {220, 880, 90, 16}, {780, 960, 16, 100},{887, 860, 100, 16}, {887, 598, 100, 16}
     };
 
     // Crear sensores de puntos de control
@@ -85,7 +85,7 @@ bool ModuleGame::Start()
     finish_line->listener = this;
 
     // Configuración inicial de la IA
-    ai_position = { 913.7f, 471.0f }; // Cambia estas coordenadas según lo que desees
+    ai_position = { 913.7f, 525.0f }; // Cambia estas coordenadas según lo que desees
     ai_rotation = 0.0f;             // Rotación inicial hacia la derecha
     ai_speed = 0.0f;
 
@@ -107,8 +107,6 @@ bool ModuleGame::Start()
 // Update
 update_status ModuleGame::Update()
 {
-   
-
     if (player1_won)
     {
         DrawTexturePro(
@@ -122,7 +120,8 @@ update_status ModuleGame::Update()
         );
         return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
     }
-     // Dibujar el mapa
+
+    // Dibujar el mapa
     DrawTexturePro(
         map_texture,
         Rectangle{ 0.0f, 0.0f, (float)map_texture.width, (float)map_texture.height },
@@ -130,7 +129,8 @@ update_status ModuleGame::Update()
         Vector2{ 0.0f, 0.0f },
         0.0f,
         WHITE);
-     // Movimiento de la IA
+
+    // Movimiento de la IA
     if (current_checkpoint_ai < checkpoint_sensors.size())
     {
         // Obtener el checkpoint actual
@@ -153,7 +153,7 @@ update_status ModuleGame::Update()
                 current_checkpoint_ai = 0;
                 ai_speed = 0.0f; // Reiniciar velocidad
                 ai_rotation = 0.0f; // Reiniciar rotación
-                ai_position = { 913.7f, 471.0f }; // Reiniciar posición inicial
+                ai_position = { 913.7f, 525.0f }; // Reiniciar posición inicial
                 ai_body->body->SetTransform(
                     b2Vec2(PIXEL_TO_METERS(ai_position.x), PIXEL_TO_METERS(ai_position.y)),
                     ai_rotation * DEG2RAD);
@@ -161,7 +161,7 @@ update_status ModuleGame::Update()
                 TraceLog(LOG_INFO, "AI completed lap %d", laps_ai);
                 if (laps_ai >= 3)
                 {
-                    TraceLog(LOG_INFO, "AI WINS!");
+                    TraceLog(LOG_INFO, "AI WINS!");
                 }
             }
         }
@@ -175,18 +175,18 @@ update_status ModuleGame::Update()
             // Calcular la rotación hacia el checkpoint
             float target_rotation = atan2(direction_y, direction_x) * RAD2DEG;
 
+            // Calcular la diferencia mínima entre el ángulo actual y el objetivo
+            float delta_rotation = fmod(target_rotation - ai_rotation + 360.0f, 360.0f);
+            if (delta_rotation > 180.0f)
+            {
+                delta_rotation -= 360.0f;
+            }
+
             // Ajustar rotación progresivamente
             float rotation_speed = 130.0f * GetFrameTime();
-            if (fabs(target_rotation - ai_rotation) > rotation_speed)
+            if (fabs(delta_rotation) > rotation_speed)
             {
-                if (target_rotation > ai_rotation)
-                {
-                    ai_rotation += rotation_speed;
-                }
-                else
-                {
-                    ai_rotation -= rotation_speed;
-                }
+                ai_rotation += (delta_rotation > 0) ? rotation_speed : -rotation_speed;
             }
             else
             {
@@ -219,11 +219,11 @@ update_status ModuleGame::Update()
         WHITE);
 
     time += GetFrameTime();
-    
     DrawTime();
 
     return UPDATE_CONTINUE;
 }
+
 
 // OnCollision
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
