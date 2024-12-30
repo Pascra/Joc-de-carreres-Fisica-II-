@@ -170,7 +170,7 @@ update_status ModuleGame::Update()
             direction_x /= distance; // Normalizar el vector dirección
             direction_y /= distance;
 
-            ai_speed = 150.0f; // Velocidad constante de la IA
+            ai_speed = 250.0f; // Velocidad constante de la IA
 
             // Calcular la rotación hacia el checkpoint
             float target_rotation = atan2(direction_y, direction_x) * RAD2DEG;
