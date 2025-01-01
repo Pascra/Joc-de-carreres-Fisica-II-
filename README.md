@@ -1,29 +1,76 @@
-# {Project Name}
+# 2D RacingGame
 
-## Description
+* [Project's Github] (https://github.com/Pascra/Joc-de-carreres-Fisica-II-)
+* Github wiki of the project: 
+* Project web: 
 
-{project description}
+## About the game
 
-## Key Features
+A fast-paced 2D pixel art racing game with a top-down static camera. Compete against a friend in local multiplayer and challenge AI opponents for high-speed action and fun!
 
- - {Feature01}
- - {Feature02}
- - {Feature03}
- - {Feature04}
- 
+## Installation instructions
+
+Download the zip file and unzip it. Open the folder, execute the .exe and enjoy!
+
+_IMPORTANT: do not modify, change or add any folder or file as you might not be able to execute the game._
+
 ## Controls
+~~~~~~~~~~~~~~~
 
- - {ControlsScheme}
+Usual controls:
+ Player 1;                    Player 2;
+W Key (up)                 UP_ARROW (up)   
+A Key (left)               LEFT_ARROW (left)
+S Key (down)               RIGHT_ARROW (down) 
+D Key (right)              DOWN_ARROW (right)
+SPACE Key (drift)
 
-## Developers
+Special controls:
+F1 (debug mode --> collisions and sensors)
 
- - {Dev01} - {Role(s)}
- - {Dev02} - {Role(s)}
- - {Dev03} - {Role(s)}
- - {Dev04} - {Role(s)}
+~~~~~~~~~~~~~~~
 
-## License
+## Features implemented
 
-This project is licensed under an unmodified MIT license, which is an OSI-certified license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
+_0.5 version features (this version is to receive feedback to improve):_
 
-{AdditionalLicenses}
+* Github page
+* Assets (map, car, etc)
+* Multiplayer
+* AI enemies implemented
+* Implementation of debug key
+* Sensors (finish line, whole racetrack)
+* Boost object
+* WIN/LOSE condition 
+
+# FrameStudios - Our team
+
+![311460330-97f5f264-2e8a-4914-b2f5-f7a4da667a82](https://github.com/Pascra/Pac-Man/assets/160216424/10c01ef0-be32-4d84-a5b6-701ed7fa1327)
+
+## Team members
+
+_Arnau Pascual and Github account_
+
+* Design / Code / Management
+* [Github account](https://github.com/Pascra)
+  
+  ![image](https://github.com/Pascra/Pac-Man/assets/160216424/46251066-7879-478c-afe9-56c7ef9d027b)
+
+
+_Roger Miralles and Github account_
+
+* Art / Code / QA
+* [Github account](https://github.com/Roster247)
+  
+  ![image](https://github.com/Pascra/Pac-Man/assets/160216424/f4575d55-e701-4ef9-8ec8-652da0fecf6a)
+
+
+_Pau Gutsens and Github account_
+
+* Design / Code / Art
+* [Github account](https://github.com/PauGutsens)
+
+
+
+
+#### _Tribute by FrameStudios_

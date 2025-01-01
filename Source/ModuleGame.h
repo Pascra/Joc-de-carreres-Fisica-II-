@@ -67,6 +67,8 @@ private:
 
     Texture2D player1_win_texture; // Textura para el mensaje de victoria del jugador 1
     bool player1_won = false;      // Bandera para indicar si el jugador 1 ha ganado
-    
-
+    Texture2D player2_win_texture; // Textura para el mensaje de victoria del jugador 1
+    bool player2_won = false;
+    Texture2D Ai_win_texture; // Textura para el mensaje de victoria del jugador 1
+    bool Ai_won = false;
 };

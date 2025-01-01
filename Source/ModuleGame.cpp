@@ -19,7 +19,9 @@ ModuleGame::ModuleGame(Application* app, bool start_enabled)
     ai_rotation(0.0f),
     ai_speed(0.0f),
     ai_body(nullptr),
-    player1_won(false)
+    player1_won(false),
+    player2_won(false),
+    Ai_won(false)
 {
 }
 
@@ -35,6 +37,18 @@ bool ModuleGame::Start()
     if (player1_win_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load Player 1 win texture!");
+        return false;
+    }
+    player2_win_texture = LoadTexture("Assets/player2_gana.png");
+    if (player1_win_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load Player 2 win texture!");
+        return false;
+    }
+    Ai_win_texture = LoadTexture("Assets/AI_gana.png");
+    if (Ai_win_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load Ai win texture!");
         return false;
     }
 
@@ -120,6 +134,32 @@ update_status ModuleGame::Update()
         );
         return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
     }
+    if (player2_won)
+    {
+        DrawTexturePro(
+            player2_win_texture,
+            Rectangle{ 0.0f, 0.0f, (float)player2_win_texture.width, (float)player2_win_texture.height },
+            Rectangle{ (float)SCREEN_WIDTH / 2 - player2_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player2_win_texture.height / 2,
+                       (float)player2_win_texture.width, (float)player2_win_texture.height },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
+    }
+    if (Ai_won)
+    {
+        DrawTexturePro(
+            Ai_win_texture,
+            Rectangle{ 0.0f, 0.0f, (float)Ai_win_texture.width, (float)Ai_win_texture.height },
+            Rectangle{ (float)SCREEN_WIDTH / 2 - Ai_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - Ai_win_texture.height / 2,
+                       (float)Ai_win_texture.width, (float)Ai_win_texture.height },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
+    }
 
     // Dibujar el mapa
     DrawTexturePro(
@@ -162,6 +202,7 @@ update_status ModuleGame::Update()
                 if (laps_ai >= 3)
                 {
                     TraceLog(LOG_INFO, "AI WINS!");
+                    Ai_won = true;
                 }
             }
         }
@@ -252,6 +293,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             if (laps_player2 >= 3)
             {
                 TraceLog(LOG_INFO, "Player 2 WINS!");
+                player2_won = true;
                 // Lógica adicional si es necesario cuando el Player 2 gana.
             }
         }
