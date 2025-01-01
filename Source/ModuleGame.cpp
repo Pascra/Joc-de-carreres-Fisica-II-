@@ -4,7 +4,6 @@
 #include "Globals.h"
 #include <cmath>
 #include "ModulePlayer.h"
-#include "p2Point.h"
 #include "ModulePhysics.h"
 
 
@@ -80,6 +79,39 @@ private:
 };
 
 
+class Rick2 : public PhysicEntity
+{
+public:
+    // Pivot 0, 0
+    static constexpr int rick_hola[8] = {
+        
+        320, 60,
+        340, 60,
+        340, 40,
+        320, 40,
+        
+
+    };
+
+    Rick2(ModulePhysics* physics, int _x, int _y, Module* listener, Texture2D _texture)
+        : PhysicEntity(physics->CreateChain(0, 0, rick_hola, 8), listener)
+        , texture(_texture)
+    {
+       
+    }
+
+    void Update() override
+    {
+        int x, y;
+        body->GetPhysicPosition(x, y);
+        DrawTextureEx(texture, Vector2{ (float)x, (float)y }, body->GetRotation() * RAD2DEG, 1.0f, WHITE);
+    }
+
+private:
+    Texture2D texture;
+};
+
+
 // Constructor
 ModuleGame::ModuleGame(Application* app, bool start_enabled)
     : Module(app, start_enabled),
@@ -109,6 +141,7 @@ bool ModuleGame::Start()
     TraceLog(LOG_INFO, "Loading game assets");
 
     entities.emplace_back(new Rick(App->physics, 0, 0, this, default));
+    entities.emplace_back(new Rick2(App->physics, 0, 0, this, default));
 
     player1_win_texture = LoadTexture("Assets/player1_gana.png");
     if (player1_win_texture.id == 0)
