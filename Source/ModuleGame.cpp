@@ -21,6 +21,7 @@ protected:
 public:
     virtual ~PhysicEntity() = default;
     virtual void Update() = 0;
+    CollisionType ctype;
 
     virtual int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal)
     {
@@ -37,26 +38,26 @@ class Rick : public PhysicEntity
 public:
     // Pivot 0, 0
     static constexpr int rick_head[40] = {
-            104, 140,
-105, 118,
-108, 103,
-114, 88,
-126, 66,
-138, 53,
-155, 37,
-178, 23,
-200, 16,
-218, 13,
-233, 12,
-233, 0,
-192, 0,
-183, 1,
-154, 14,
-132, 30,
-111, 54,
-94, 88,
-88, 119,
-88, 140,
+        104, 140,
+        105, 118,
+        108, 103,
+        114, 88,
+        126, 66,
+        138, 53,
+        155, 37,
+        178, 23,
+        200, 16,
+        218, 13,
+        233, 12,
+        233, 0,
+        192, 0,
+        183, 1,
+        154, 14,
+        132, 30,
+        111, 54,
+        94, 88,
+        88, 119,
+        88, 140,
 
     };
 
@@ -64,7 +65,7 @@ public:
         : PhysicEntity(physics->CreateChain(0,0, rick_head, 40), listener)
         , texture(_texture)
     {
-
+        ctype = CollisionType::DEFAULT;
     }
 
     void Update() override
