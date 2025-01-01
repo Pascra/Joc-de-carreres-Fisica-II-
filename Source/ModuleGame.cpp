@@ -4,6 +4,80 @@
 #include "Globals.h"
 #include <cmath>
 #include "ModulePlayer.h"
+#include "p2Point.h"
+#include "ModulePhysics.h"
+
+
+class PhysicEntity
+{
+protected:
+
+    PhysicEntity(PhysBody* _body, Module* listener)
+        : body(_body), listener(listener)
+    {
+        body->listener = listener;
+    }
+
+public:
+    virtual ~PhysicEntity() = default;
+    virtual void Update() = 0;
+
+    virtual int RayHit(vec2<int> ray, vec2<int> mouse, vec2<float>& normal)
+    {
+        return 0;
+    }
+
+protected:
+    PhysBody* body;
+    Module* listener = nullptr;
+};
+
+class Rick : public PhysicEntity
+{
+public:
+    // Pivot 0, 0
+    static constexpr int rick_head[40] = {
+            104, 140,
+105, 118,
+108, 103,
+114, 88,
+126, 66,
+138, 53,
+155, 37,
+178, 23,
+200, 16,
+218, 13,
+233, 12,
+233, 0,
+192, 0,
+183, 1,
+154, 14,
+132, 30,
+111, 54,
+94, 88,
+88, 119,
+88, 140,
+
+    };
+
+    Rick(ModulePhysics* physics, int _x, int _y, Module* listener, Texture2D _texture)
+        : PhysicEntity(physics->CreateChain(0,0, rick_head, 40), listener)
+        , texture(_texture)
+    {
+
+    }
+
+    void Update() override
+    {
+        int x, y;
+        body->GetPhysicPosition(x, y);
+        DrawTextureEx(texture, Vector2{ (float)x, (float)y }, body->GetRotation() * RAD2DEG, 1.0f, WHITE);
+    }
+
+private:
+    Texture2D texture;
+};
+
 
 // Constructor
 ModuleGame::ModuleGame(Application* app, bool start_enabled)
@@ -32,6 +106,8 @@ ModuleGame::~ModuleGame() {}
 bool ModuleGame::Start()
 {
     TraceLog(LOG_INFO, "Loading game assets");
+
+    entities.emplace_back(new Rick(App->physics, 0, 0, this, default));
 
     player1_win_texture = LoadTexture("Assets/player1_gana.png");
     if (player1_win_texture.id == 0)
@@ -169,6 +245,8 @@ update_status ModuleGame::Update()
         Vector2{ 0.0f, 0.0f },
         0.0f,
         WHITE);
+
+   
 
     // Movimiento de la IA
     if (current_checkpoint_ai < checkpoint_sensors.size())

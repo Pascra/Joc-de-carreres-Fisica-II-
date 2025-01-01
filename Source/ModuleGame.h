@@ -6,6 +6,8 @@
 #include "ModulePhysics.h"
 #include <vector>
 
+class PhysicEntity;
+
 // Estructura para los checkpoints
 struct Checkpoint
 {
@@ -29,6 +31,10 @@ public:
    
     bool IsPlayer1Winner() const { return player1_won; }
     bool IsGameOver() const { return player1_won; }
+
+    std::vector<PhysicEntity*> entities;
+
+    Texture2D default;
 
 private:
     // Mapa

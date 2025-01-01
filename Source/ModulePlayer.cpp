@@ -53,11 +53,10 @@ bool ModulePlayer::Start()
     // Inicializar jugador 1
     car_position.x = (1920.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
     car_position.y = (1144.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
-    car_body = App->physics->CreateRectangle(
+    car_body = App->physics->CreateCircle(
         car_position.x,
         car_position.y,
-        car_texture.width * scale * 0.2f,  // Hacer la hitbox un poco más pequeña que el sprite
-        car_texture.height * scale * 0.2f
+        40
     );
     car_body->ctype = CollisionType::PLAYER1;
     car_rotation = 180.0f;
