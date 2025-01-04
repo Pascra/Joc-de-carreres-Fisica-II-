@@ -103,28 +103,39 @@ update_status ModulePlayer::Update()
     float front_angle = car_angle - (90.0f * DEG2RAD);
 
         // Control del Player 1
-        if (IsKeyDown(KEY_W)) // Acelerar hacia adelante
+        if(IsKeyDown(KEY_W)) // Acelerar hacia adelante
         {
             speed += acceleration * delta_time;
+
+            // Limitar la velocidad máxima hacia adelante
             if (speed > max_speed)
                 speed = max_speed;
+
+            // Aplicar boost solo si la velocidad es positiva (avance)
+            if (speed > 0.0f)
                 speed *= speed_boost_player1;
         }
         else if (IsKeyDown(KEY_S)) // Retroceder
         {
             speed -= acceleration * delta_time;
+
+            // Limitar la velocidad máxima en retroceso
             if (speed < -max_speed / 2)
                 speed = -max_speed / 2;
+
+            // Aplicar boost solo si la velocidad es negativa (retroceso)
+            if (speed < 0.0f)
                 speed *= speed_boost_player1;
         }
         else
         {
-            // Aplicamos la desaceleración antes del boost
-            float base_speed = speed / speed_boost_player1; // Revertimos el boost temporalmente
-            base_speed *= 0.95f;                    // Aplicamos la desaceleración
+            // Aplicar desaceleración natural sin boost
+            float base_speed = speed * 0.95f;
+
             if (fabs(base_speed) < 10.0f)
                 base_speed = 0.0f;
-            speed = base_speed * speed_boost_player1;       // Reaplicamos el boost
+
+            speed = base_speed;
         }
         if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.4f) // Solo permite derrape a cierta velocidad
         {
@@ -196,24 +207,36 @@ update_status ModulePlayer::Update()
         if (IsKeyDown(KEY_UP))
         {
             player2_speed += acceleration * delta_time;
-            if(player2_speed > max_speed)
+
+            // Limitar la velocidad máxima hacia adelante
+            if (player2_speed > max_speed)
                 player2_speed = max_speed;
+
+            // Aplicar boost solo si la velocidad es positiva (avance)
+            if (player2_speed > 0.0f)
                 player2_speed *= speed_boost_player2;
         }
+
         else if (IsKeyDown(KEY_DOWN))
         {
             player2_speed -= acceleration * delta_time;
-            if(player2_speed < -max_speed / 2)
+
+            // Limitar la velocidad máxima en retroceso
+            if (player2_speed < -max_speed / 2)
                 player2_speed = -max_speed / 2;
+
+            // Aplicar boost solo si la velocidad es negativa (retroceso)
+            if (player2_speed < 0.0f)
                 player2_speed *= speed_boost_player2;
         }
-        else //Desaceleración natural
+        else
         {
-            float base_speed = player2_speed / speed_boost_player2;
-            base_speed *= 0.95f;
+            float base_speed = player2_speed * 0.95f;
+
             if (fabs(base_speed) < 10.0f)
                 base_speed = 0.0f;
-            player2_speed = base_speed * speed_boost_player2;
+
+            player2_speed = base_speed;
         }
         float total_rotation = car_rotation + drift_angle;
         float adjusted_rotation = total_rotation - 90.0f;
@@ -320,12 +343,12 @@ void ModulePlayer::ApplySpeedBoost(int playerNum)
 {
     if (playerNum == 1)
     {
-        speed_boost_player1 = 1.5f;
+        speed_boost_player1 = 1.3f;
         LOG("Applied speed boost to Player 1");
     }
     else if (playerNum == 2)
     {
-        speed_boost_player2 = 1.5f;
+        speed_boost_player2 = 1.3f;
         LOG("Applied speed boost to Player 2");
     }
 }
