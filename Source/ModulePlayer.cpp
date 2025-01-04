@@ -9,8 +9,8 @@ ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     : Module(app, start_enabled), car_texture{ 0 }, car_texture2{ 0 },
     car_position{ 400.0f, 300.0f }, player2_position{ 300.0f, 200.0f },
     car_rotation(0.0f), player2_rotation(0.0f),
-    speed(-10.0f), player2_speed(0.0f),
-    speed_boost(1.0f), base_speed_boost(1.0f),
+    speed(-10.0f), player2_speed(-10.0f),
+    speed_boost_player1(1.0f), speed_boost_player2(1.0f), base_speed_boost(1.0f),
     acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr),
     is_drifting(false),
     drift_factor(0.0f),
@@ -89,85 +89,159 @@ update_status ModulePlayer::Update()
 {
     float delta_time = GetFrameTime();
 
+    if(App->game->IsPlayer1Winner())
+    {
+        return UPDATE_CONTINUE; // No dibujar coches si el jugador 1 ganó
+    }
+    if (App->game->IsGameOver())
+    {
+        return UPDATE_CONTINUE; // Detener el dibujado de los jugadores si el juego ha terminado
+    }
+
     // Player 1
     float car_angle = car_body->body->GetAngle();
     float front_angle = car_angle - (90.0f * DEG2RAD);
 
-    // Control del Player 1
-    if (IsKeyDown(KEY_W)) // Acelerar hacia adelante
-    {
-        speed += acceleration * delta_time;
-        if (speed > max_speed)
-            speed = max_speed;
-    }
-    else if (IsKeyDown(KEY_S)) // Retroceder
-    {
-        speed -= acceleration * delta_time;
-        if (speed < -max_speed / 2)
-            speed = -max_speed / 2;
-    }
-    else
-    {
-        speed *= 0.95f; // Desaceleración natural
-        if (fabs(speed) < 10.0f)
-            speed = 0.0f;
-    }
+        // Control del Player 1
+        if (IsKeyDown(KEY_W)) // Acelerar hacia adelante
+        {
+            speed += acceleration * delta_time;
+            if (speed > max_speed)
+                speed = max_speed;
+                speed *= speed_boost_player1;
+        }
+        else if (IsKeyDown(KEY_S)) // Retroceder
+        {
+            speed -= acceleration * delta_time;
+            if (speed < -max_speed / 2)
+                speed = -max_speed / 2;
+                speed *= speed_boost_player1;
+        }
+        else
+        {
+            // Aplicamos la desaceleración antes del boost
+            float base_speed = speed / speed_boost_player1; // Revertimos el boost temporalmente
+            base_speed *= 0.95f;                    // Aplicamos la desaceleración
+            if (fabs(base_speed) < 10.0f)
+                base_speed = 0.0f;
+            speed = base_speed * speed_boost_player1;       // Reaplicamos el boost
+        }
+        if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.4f) // Solo permite derrape a cierta velocidad
+        {
+            if (!is_drifting)
+            {
+                is_drifting = true;
+                drift_factor = 0.0f;
+            }
 
-    // Rotación Player 1
-    float angular_velocity = 0.0f;
-    if (IsKeyDown(KEY_A))
-        angular_velocity = -handling;
-    if (IsKeyDown(KEY_D))
-        angular_velocity = handling;
+            // Incrementa el factor de derrape
+            drift_factor = fmin(drift_factor + delta_time * 2.0f, 1.0f);
 
-    car_body->body->SetAngularVelocity(angular_velocity * delta_time);
 
-    b2Vec2 velocity(
-        cos(front_angle) * PIXEL_TO_METERS(speed),
-        sin(front_angle) * PIXEL_TO_METERS(speed)
-    );
-    car_body->body->SetLinearVelocity(velocity);
+            // Ajusta el ángulo de derrape basado en la dirección
+            if (IsKeyDown(KEY_A))
+            {
+                speed += 100;
+                drift_angle = -45.0f * drift_factor;
+                lateral_velocity = -speed * 0.3f * drift_factor;
+            }
+            else if (IsKeyDown(KEY_D))
+            {
+                speed += 100;
+                drift_angle = 45.0f * drift_factor;
+                lateral_velocity = speed * 0.3f * drift_factor;
+            }
 
-    // Player 2
-    float player2_angle = player2_body->body->GetAngle();
-    float player2_front_angle = player2_angle - (90.0f * DEG2RAD);
+            // Reduce la velocidad durante el derrape
+            speed *= drift_speed_multiplier;
+        }
+        else
+        {
+            // Recuperación del derrape
+            if (is_drifting)
+            {
+                drift_factor = fmax(0.0f, drift_factor - delta_time * drift_recovery);
+                drift_angle *= drift_factor;
+                lateral_velocity *= drift_factor;
 
-    // Control del Player 2
-    if (IsKeyDown(KEY_UP))
-    {
-        player2_speed += acceleration * delta_time;
-        if (player2_speed > max_speed)
-            player2_speed = max_speed;
-    }
-    else if (IsKeyDown(KEY_DOWN))
-    {
-        player2_speed -= acceleration * delta_time;
-        if (player2_speed < -max_speed / 2)
-            player2_speed = -max_speed / 2;
-    }
-    else
-    {
-        player2_speed *= 0.95f;
-        if (fabs(player2_speed) < 10.0f)
-            player2_speed = 0.0f;
-    }
+                if (drift_factor <= 0.0f)
+                {
+                    is_drifting = false;
+                    drift_angle = 0.0f;
+                    lateral_velocity = 0.0f;
+                }
+            }
+        }
 
-    // Rotación Player 2
-    float player2_angular_velocity = 0.0f;
-    if (IsKeyDown(KEY_LEFT))
-        player2_angular_velocity = -handling;
-    if (IsKeyDown(KEY_RIGHT))
-        player2_angular_velocity = handling;
+        // Rotación Player 1
+        float angular_velocity = 0.0f;
+        if (IsKeyDown(KEY_A))
+            angular_velocity = -handling;
+        if (IsKeyDown(KEY_D))
+            angular_velocity = handling;
 
-    player2_body->body->SetAngularVelocity(player2_angular_velocity * delta_time);
+        car_body->body->SetAngularVelocity(angular_velocity * delta_time);
 
-    b2Vec2 player2_velocity(
-        cos(player2_front_angle) * PIXEL_TO_METERS(player2_speed),
-        sin(player2_front_angle) * PIXEL_TO_METERS(player2_speed)
-    );
-    player2_body->body->SetLinearVelocity(player2_velocity);
+        b2Vec2 velocity(
+            cos(front_angle) * PIXEL_TO_METERS(speed),
+            sin(front_angle) * PIXEL_TO_METERS(speed)
+        );
+        car_body->body->SetLinearVelocity(velocity);
 
-    return UPDATE_CONTINUE;
+        // Player 2
+        float player2_angle = player2_body->body->GetAngle();
+        float player2_front_angle = player2_angle - (90.0f * DEG2RAD);
+
+        // Control del Player 2
+        if (IsKeyDown(KEY_UP))
+        {
+            player2_speed += acceleration * delta_time;
+            if(player2_speed > max_speed)
+                player2_speed = max_speed;
+                player2_speed *= speed_boost_player2;
+        }
+        else if (IsKeyDown(KEY_DOWN))
+        {
+            player2_speed -= acceleration * delta_time;
+            if(player2_speed < -max_speed / 2)
+                player2_speed = -max_speed / 2;
+                player2_speed *= speed_boost_player2;
+        }
+        else //Desaceleración natural
+        {
+            float base_speed = player2_speed / speed_boost_player2;
+            base_speed *= 0.95f;
+            if (fabs(base_speed) < 10.0f)
+                base_speed = 0.0f;
+            player2_speed = base_speed * speed_boost_player2;
+        }
+        float total_rotation = car_rotation + drift_angle;
+        float adjusted_rotation = total_rotation - 90.0f;
+        // Añade el movimiento lateral del derrape
+        if (is_drifting)
+        {
+            car_position.x += cos((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+            car_position.y += sin((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
+        }
+       
+
+        // Rotación Player 2
+        float player2_angular_velocity = 0.0f;
+        if (IsKeyDown(KEY_LEFT))
+            player2_angular_velocity = -handling;
+        if (IsKeyDown(KEY_RIGHT))
+            player2_angular_velocity = handling;
+
+        player2_body->body->SetAngularVelocity(player2_angular_velocity * delta_time);
+
+        b2Vec2 player2_velocity(
+            cos(player2_front_angle) * PIXEL_TO_METERS(player2_speed),
+            sin(player2_front_angle) * PIXEL_TO_METERS(player2_speed)
+        );
+        player2_body->body->SetLinearVelocity(player2_velocity);
+
+        return UPDATE_CONTINUE;
+
 }
 
 
@@ -246,21 +320,27 @@ void ModulePlayer::ApplySpeedBoost(int playerNum)
 {
     if (playerNum == 1)
     {
-        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        speed_boost_player1 = 1.5f;
         LOG("Applied speed boost to Player 1");
     }
     else if (playerNum == 2)
     {
-        speed_boost = 1.5f;  // Aumentado el boost para que sea más notable
+        speed_boost_player2 = 1.5f;
         LOG("Applied speed boost to Player 2");
     }
 }
 
 void ModulePlayer::RestoreSpeedBoost(int playerNum)
 {
-    if (playerNum == 1 || playerNum == 2)
+    if (playerNum == 1)
     {
-        speed_boost = base_speed_boost;  // Restaurar a la velocidad base
-        LOG("Restored normal speed");
+        speed_boost_player1 = base_speed_boost;
+        LOG("Restored normal speed for Player 1");
+    }
+    else if (playerNum == 2)
+    {
+        speed_boost_player2 = base_speed_boost;
+        LOG("Restored normal speed for Player 2");
     }
 }
+

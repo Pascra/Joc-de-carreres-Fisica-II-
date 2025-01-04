@@ -43,6 +43,8 @@ private:
     float base_speed_boost = 1.0f;    // Velocidad normal
     float current_speed_boost = 1.0f;  // Velocidad actual del boost
     float speed_boost;
+    float speed_boost_player1;
+    float speed_boost_player2;
 
     bool is_drifting;         // Estado de derrape
     float drift_factor;       // Factor de derrape
