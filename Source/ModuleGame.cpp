@@ -741,7 +741,7 @@ void ModuleGame::DrawLaps() {
     float fontSize = 20.0f;
 
     // Define el color gris
-    Color color = GRAY; // O usa {128, 128, 128, 255} para un tono personalizado
+    Color color = GRAY; 
 
     int startX = SCREEN_WIDTH - 200;
     int startY = 10;
