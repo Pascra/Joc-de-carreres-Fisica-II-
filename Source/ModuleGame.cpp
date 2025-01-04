@@ -652,6 +652,7 @@ update_status ModuleGame::Update()
 
     time += GetFrameTime();
     DrawTime();
+    DrawLaps(); // Mostrar las vueltas completadas
 
     return UPDATE_CONTINUE;
 }
@@ -736,6 +737,28 @@ void ModuleGame::DrawTime() {
     // Usar DrawText de raylib directamente
     DrawText(TimeText, (int)position.x, (int)position.y, (int)fontSize, color);
 }
+void ModuleGame::DrawLaps() {
+    float fontSize = 20.0f;
+
+    // Define el color gris
+    Color color = GRAY; // O usa {128, 128, 128, 255} para un tono personalizado
+
+    int startX = SCREEN_WIDTH - 200;
+    int startY = 10;
+    int lineSpacing = 25;
+
+    char lapsText[50];
+
+    snprintf(lapsText, sizeof(lapsText), "Player 1 Laps: %d", laps_player1);
+    DrawText(lapsText, startX, startY, (int)fontSize, color);
+
+    snprintf(lapsText, sizeof(lapsText), "Player 2 Laps: %d", laps_player2);
+    DrawText(lapsText, startX, startY + lineSpacing, (int)fontSize, color);
+
+    snprintf(lapsText, sizeof(lapsText), "AI Laps: %d", laps_ai);
+    DrawText(lapsText, startX, startY + lineSpacing * 2, (int)fontSize, color);
+}
+
 
 bool ModuleGame::CleanUp()
 {

@@ -37,6 +37,10 @@ public:
 
     Texture2D default;
 
+    void DrawLaps();
+
+
+
 private:
     // Mapa
     Texture2D map_texture;
