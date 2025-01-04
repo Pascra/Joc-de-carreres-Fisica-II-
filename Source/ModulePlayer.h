@@ -20,6 +20,8 @@ public:
     PhysBody* GetPlayer2Body() const;      // Obtiene el cuerpo físico del coche del jugador 2
     void ApplySpeedBoost(int playerNum);
     void RestoreSpeedBoost(int playerNum);
+    update_status PostUpdate() override;
+
 
 private:
     // Jugador 1
