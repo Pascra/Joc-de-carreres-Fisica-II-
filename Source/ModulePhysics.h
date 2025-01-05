@@ -38,7 +38,7 @@ public:
 	float GetRotation() const;
 	bool Contains(int x, int y) const;
 	int RayCast(int x1, int y1, int x2, int y2, float& normal_x, float& normal_y) const;
-
+	
 public:
 	int width, height;
 	b2Body* body;
@@ -65,12 +65,12 @@ public:
 
 	// b2ContactListener ---
 	void BeginContact(b2Contact* contact);
-	
-
+	b2World* world;
+	b2World* GetWorld() const { return world; }
 private:
 
 	bool debug;
-	b2World* world;
+	
 	b2MouseJoint* mouse_joint;
 	b2Body* ground;
 };

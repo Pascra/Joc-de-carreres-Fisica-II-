@@ -23,7 +23,10 @@ ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
 }
 
 // Destructor
-ModulePlayer::~ModulePlayer() {}
+ModulePlayer::~ModulePlayer()
+{
+    CleanUp(); // Garantiza que todos los recursos se liberen antes de la destrucción
+}
 
 // Load assets
 bool ModulePlayer::Start()
@@ -309,21 +312,6 @@ update_status ModulePlayer::PostUpdate()
     return UPDATE_CONTINUE;
 }
 
-
-
-
-
-
-
-// Unload assets
-bool ModulePlayer::CleanUp()
-{
-    LOG("Unloading player assets");
-    UnloadTexture(car_texture);
-    UnloadTexture(car_texture2);
-    return true;
-}
-
 // Métodos públicos para obtener datos
 Vector2 ModulePlayer::GetCarPosition() const
 {
@@ -367,3 +355,48 @@ void ModulePlayer::RestoreSpeedBoost(int playerNum)
     }
 }
 
+// Unload assets
+bool ModulePlayer::CleanUp()
+{
+    LOG("Unloading player assets");
+
+    // Destruir el cuerpo físico de Player 1
+    if (car_body != nullptr)
+    {
+        if (car_body->body != nullptr)
+        {
+            App->physics->world->DestroyBody(car_body->body); // Destruye el cuerpo Box2D
+            car_body->body = nullptr;
+        }
+        delete car_body; // Libera el objeto PhysBody
+        car_body = nullptr; // Evita punteros colgantes
+    }
+
+    // Destruir el cuerpo físico de Player 2
+    if (car_body != nullptr)
+    {
+        if (car_body->body != nullptr)
+        {
+            App->physics->GetWorld()->DestroyBody(car_body->body); // Usar el método público
+            car_body->body = nullptr;
+        }
+        delete car_body;
+        car_body = nullptr;
+    }
+
+
+    // Liberar texturas cargadas
+    if (car_texture.id != 0)
+    {
+        UnloadTexture(car_texture); // Libera la textura de Player 1
+        car_texture = { 0 };       // Resetea la textura
+    }
+
+    if (car_texture2.id != 0)
+    {
+        UnloadTexture(car_texture2); // Libera la textura de Player 2
+        car_texture2 = { 0 };        // Resetea la textura
+    }
+
+    return true;
+}
