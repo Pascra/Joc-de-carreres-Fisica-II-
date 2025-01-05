@@ -1,3 +1,4 @@
+#define _CRTDBG_MAP_ALLOC
 #include "Application.h"
 #include "Globals.h"
 
@@ -16,6 +17,9 @@ enum main_states
 
 int main(int argc, char ** argv)
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	
+	
 	LOG("Starting game '%s'...", TITLE);
 	SetTargetFPS(60);
 	int main_return = EXIT_FAILURE;

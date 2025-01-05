@@ -764,22 +764,36 @@ bool ModuleGame::CleanUp()
 {
     TraceLog(LOG_INFO, "Unloading game assets");
 
+    // Liberar entidades físicas
+    for (auto entity : entities)
+    {
+        delete entity;
+    }
+    entities.clear();
+
+    // Liberar sensores de checkpoints
     for (auto sensor : checkpoint_sensors)
     {
-        delete sensor; // Libera sensores
+        delete sensor;
     }
     checkpoint_sensors.clear();
 
+    // Liberar línea de meta
     if (finish_line)
     {
-        delete finish_line; // Libera línea de meta
+        delete finish_line;
         finish_line = nullptr;
     }
 
-    UnloadTexture(map_texture); // Libera textura del mapa
-    UnloadTexture(ai_texture);  // Libera textura de la IA
+    // Liberar texturas cargadas
+    UnloadTexture(map_texture);
+    UnloadTexture(ai_texture);
+    UnloadTexture(player1_win_texture);
+    UnloadTexture(player2_win_texture);
+    UnloadTexture(Ai_win_texture);
 
     return true;
 }
+
 
 
