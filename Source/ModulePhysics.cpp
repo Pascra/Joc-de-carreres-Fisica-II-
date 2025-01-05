@@ -202,7 +202,6 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 
 	b2Body* b = world->CreateBody(&body);
 
-	b2ChainShape shape;
 	b2Vec2* p = new b2Vec2[size / 2];
 
 	for (int i = 0; i < size / 2; ++i)
@@ -211,21 +210,29 @@ PhysBody* ModulePhysics::CreateChain(int x, int y, const int* points, int size)
 		p[i].y = PIXEL_TO_METERS(points[i * 2 + 1]);
 	}
 
+	b2ChainShape shape;
 	shape.CreateLoop(p, size / 2);
 
 	b2FixtureDef fixture;
 	fixture.shape = &shape;
 	fixture.density = 1.0f;
 
-	b->CreateFixture(&fixture);
+	if (!b->CreateFixture(&fixture))
+	{
+		delete[] p;    // Liberar memoria en caso de error
+		delete pbody;  // Liberar el PhysBody si falla la creación del fixture
+		world->DestroyBody(b); // Eliminar el cuerpo creado
+		return nullptr;
+	}
 
-	delete p;
+	delete[] p; // Liberar memoria dinámica correctamente
 
 	pbody->body = b;
 	pbody->width = pbody->height = 0;
 
 	return pbody;
 }
+
 
 // 
 update_status ModulePhysics::PostUpdate()

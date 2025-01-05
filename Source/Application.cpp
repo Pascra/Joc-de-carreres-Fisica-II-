@@ -46,9 +46,12 @@ Application::~Application()
     for (auto it = list_modules.rbegin(); it != list_modules.rend(); ++it)
     {
         Module* item = *it;
-        TraceLog(LOG_INFO, "Deleting module: %p", item);
-        delete item; // Elimina cada módulo
-        *it = nullptr; // Establece el puntero a nullptr (opcional, si no se va a usar después)
+        if (item)
+        {
+            TraceLog(LOG_INFO, "Deleting module: %p", item);
+            delete item; // Elimina cada módulo
+            *it = nullptr; // Establece el puntero a nullptr para evitar dangling pointers
+        }
     }
 
     // Si `game` no está en la lista de módulos, elimínalo por separado
@@ -59,11 +62,10 @@ Application::~Application()
         game = nullptr; // Limpia el puntero de `game`
     }
 
-    // Limpiar la lista
+    // Limpiar la lista de módulos
     list_modules.clear();
     TraceLog(LOG_INFO, "Application shutdown complete.");
 }
-
 
 bool Application::Init()
 {
@@ -73,7 +75,10 @@ bool Application::Init()
     for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
     {
         Module* module = *it;
-        ret = module->Init();
+        if (module)
+        {
+            ret = module->Init();
+        }
     }
 
     // After all Init calls we call Start() in all modules
@@ -82,7 +87,10 @@ bool Application::Init()
     for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
     {
         Module* module = *it;
-        ret = module->Start();
+        if (module)
+        {
+            ret = module->Start();
+        }
     }
 
     return ret;
@@ -96,7 +104,7 @@ update_status Application::Update()
     for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
     {
         Module* module = *it;
-        if (module->IsEnabled())
+        if (module && module->IsEnabled())
         {
             ret = module->PreUpdate();
         }
@@ -105,7 +113,7 @@ update_status Application::Update()
     for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
     {
         Module* module = *it;
-        if (module->IsEnabled())
+        if (module && module->IsEnabled())
         {
             ret = module->Update();
         }
@@ -114,13 +122,14 @@ update_status Application::Update()
     for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
     {
         Module* module = *it;
-        if (module->IsEnabled())
+        if (module && module->IsEnabled())
         {
             ret = module->PostUpdate();
         }
     }
 
-    if (WindowShouldClose()) ret = UPDATE_STOP;
+    if (WindowShouldClose())
+        ret = UPDATE_STOP;
 
     return ret;
 }
@@ -131,7 +140,10 @@ bool Application::CleanUp()
     for (auto it = list_modules.rbegin(); it != list_modules.rend() && ret; ++it)
     {
         Module* item = *it;
-        ret = item->CleanUp();
+        if (item)
+        {
+            ret = item->CleanUp();
+        }
     }
 
     return ret;
@@ -139,5 +151,8 @@ bool Application::CleanUp()
 
 void Application::AddModule(Module* mod)
 {
-    list_modules.emplace_back(mod);
+    if (mod)
+    {
+        list_modules.emplace_back(mod);
+    }
 }
