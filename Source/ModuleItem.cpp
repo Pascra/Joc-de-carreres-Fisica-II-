@@ -34,12 +34,12 @@ bool ModuleItem::Start()
     // Crear el sensor físico
     item_sensor = App->physics->CreateRectangleSensor(
         item_position.x,
-        item_position.y,
-        frame_rec.width * 0.5f,  // Reducido el tamaño del sensor
-        frame_rec.height * 0.5f
+        item_position.y + 10,
+        frame_rec.width * 0.63f,  
+        frame_rec.height * 0.63f
     );
     item_sensor->ctype = CollisionType::ITEM;
-    item_sensor->listener = this; // ¡IMPORTANTE! Esto faltaba
+    item_sensor->listener = this; 
 
     return true;
 }
