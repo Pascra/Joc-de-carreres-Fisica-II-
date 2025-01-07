@@ -12,13 +12,18 @@ ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
     speed(-10.0f), player2_speed(-10.0f),
     speed_boost_player1(1.0f), speed_boost_player2(1.0f), base_speed_boost(1.0f),
     acceleration(125.0f), max_speed(300.0f), handling(200.0f), car_body(nullptr), player2_body(nullptr),
+    // Player 1 drift variables
     is_drifting(false),
     drift_factor(0.0f),
     drift_angle(0.0f),
-    drift_recovery(2.0f),
-    drift_speed_multiplier(0.85f),
-    lateral_velocity(10.0f)
-
+    drift_recovery(3.0f),
+    drift_speed_multiplier(0.92f),
+    lateral_velocity(8.0f),
+    // Player 2 drift variables
+    is_drifting_p2(false),
+    drift_factor_p2(0.0f),
+    drift_angle_p2(0.0f),
+    lateral_velocity_p2(8.0f)
 {
 }
 
@@ -140,7 +145,7 @@ update_status ModulePlayer::Update()
 
             speed = base_speed;
         }
-        if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.4f) // Solo permite derrape a cierta velocidad
+        if (IsKeyDown(KEY_SPACE) && fabs(speed) > max_speed * 0.3f) // Reduced speed threshold for easier drift initiation
         {
             if (!is_drifting)
             {
@@ -148,35 +153,34 @@ update_status ModulePlayer::Update()
                 drift_factor = 0.0f;
             }
 
-            // Incrementa el factor de derrape
-            drift_factor = fmin(drift_factor + delta_time * 2.0f, 1.0f);
+            // More gradual drift factor increase for better control
+            drift_factor = fmin(drift_factor + delta_time * 1.5f, 1.0f);
 
-
-            // Ajusta el ángulo de derrape basado en la dirección
+            // Reduced drift angles for tighter turns
             if (IsKeyDown(KEY_A))
             {
-                speed += 100;
-                drift_angle = -45.0f * drift_factor;
-                lateral_velocity = -speed * 0.3f * drift_factor;
+                speed += 50; // Reduced speed boost during drift
+                drift_angle = -30.0f * drift_factor; // Reduced from -45.0f
+                lateral_velocity = -speed * 0.25f * drift_factor; // Reduced multiplier for more controlled slides
             }
             else if (IsKeyDown(KEY_D))
             {
-                speed += 100;
-                drift_angle = 45.0f * drift_factor;
-                lateral_velocity = speed * 0.3f * drift_factor;
+                speed += 50; // Reduced speed boost during drift
+                drift_angle = 30.0f * drift_factor; // Reduced from 45.0f
+                lateral_velocity = speed * 0.25f * drift_factor; // Reduced multiplier for more controlled slides
             }
 
-            // Reduce la velocidad durante el derrape
+            // More gradual speed reduction during drift
             speed *= drift_speed_multiplier;
         }
         else
         {
-            // Recuperación del derrape
+            // Smoother drift recovery
             if (is_drifting)
             {
                 drift_factor = fmax(0.0f, drift_factor - delta_time * drift_recovery);
-                drift_angle *= drift_factor;
-                lateral_velocity *= drift_factor;
+                drift_angle *= drift_factor * 0.9f; 
+                lateral_velocity *= drift_factor * 0.9f; 
 
                 if (drift_factor <= 0.0f)
                 {
@@ -250,6 +254,57 @@ update_status ModulePlayer::Update()
             car_position.y += sin((adjusted_rotation + 90.0f) * DEG2RAD) * lateral_velocity * delta_time;
         }
        
+        if (IsKeyDown(KEY_ENTER) && fabs(player2_speed) > max_speed * 0.3f)
+        {
+            if (!is_drifting_p2)
+            {
+                is_drifting_p2 = true;
+                drift_factor_p2 = 0.0f;
+            }
+
+            drift_factor_p2 = fmin(drift_factor_p2 + delta_time * 1.5f, 1.0f);
+
+            if (IsKeyDown(KEY_LEFT))
+            {
+                player2_speed += 50;
+                drift_angle_p2 = -30.0f * drift_factor_p2;
+                lateral_velocity_p2 = -player2_speed * 0.25f * drift_factor_p2;
+            }
+            else if (IsKeyDown(KEY_RIGHT))
+            {
+                player2_speed += 50;
+                drift_angle_p2 = 30.0f * drift_factor_p2;
+                lateral_velocity_p2 = player2_speed * 0.25f * drift_factor_p2;
+            }
+
+            player2_speed *= drift_speed_multiplier;
+        }
+        else
+        {
+            if (is_drifting_p2)
+            {
+                drift_factor_p2 = fmax(0.0f, drift_factor_p2 - delta_time * drift_recovery);
+                drift_angle_p2 *= drift_factor_p2 * 0.9f;
+                lateral_velocity_p2 *= drift_factor_p2 * 0.9f;
+
+                if (drift_factor_p2 <= 0.0f)
+                {
+                    is_drifting_p2 = false;
+                    drift_angle_p2 = 0.0f;
+                    lateral_velocity_p2 = 0.0f;
+                }
+            }
+        }
+
+        // Añadir el movimiento lateral del derrape para Player 2 
+        float total_rotation_p2 = player2_rotation + drift_angle_p2;
+        float adjusted_rotation_p2 = total_rotation_p2 - 90.0f;
+
+        if (is_drifting_p2)
+        {
+            player2_position.x += cos((adjusted_rotation_p2 + 90.0f) * DEG2RAD) * lateral_velocity_p2 * delta_time;
+            player2_position.y += sin((adjusted_rotation_p2 + 90.0f) * DEG2RAD) * lateral_velocity_p2 * delta_time;
+        }
 
         // Rotación Player 2
         float player2_angular_velocity = 0.0f;
