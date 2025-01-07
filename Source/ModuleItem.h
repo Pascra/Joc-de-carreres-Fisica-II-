@@ -16,26 +16,32 @@ public:
     void OnCollision(PhysBody* body1, PhysBody* body2) override;
 
 private:
-    Texture2D item_texture;        // Textura del item
-    Vector2 item_position;         // Posición del item
-    PhysBody* item_sensor;         // Sensor físico del item
-    bool item_active;              // Estado del item (visible/invisible)
-    float respawn_timer;           // Temporizador para reaparecer
-    float respawn_time;            // Tiempo que tarda en reaparecer
+    // Item 1
+    Texture2D item_texture;
+    Vector2 item_position;
+    PhysBody* item_sensor;
+    bool item_active;
+    float respawn_timer;
+    float respawn_time;
 
-    // Variables para la animación
-    Rectangle frame_rec;           // Rectangle para el frame actual
-    int current_frame;             // Frame actual de la animación
-    int frames_counter;            // Contador para la animación
-    int frames_speed;              // Velocidad de la animación
+    // Solo añadir estas variables para el segundo item
+    Vector2 item_position2;
+    PhysBody* item_sensor2;
+    bool item_active2;
+    float respawn_timer2;
 
-    // Variables para el boost
-    float boost_duration;          // Duración del boost
-    float boost_timer_p1;          // Temporizador del boost para player 1
-    float boost_timer_p2;          // Temporizador del boost para player 2
-    bool is_boosted_p1;           // Estado del boost para player 1
-    bool is_boosted_p2;           // Estado del boost para player 2
+    // El resto igual que estaba
+    Rectangle frame_rec;
+    int current_frame;
+    int frames_counter;
+    int frames_speed;
 
-    void UpdateBoostTimers();      // Actualiza los temporizadores de boost
-    void ApplyBoostToPlayer(int playerNum); // Aplica el boost al jugador
+    float boost_duration;
+    float boost_timer_p1;
+    float boost_timer_p2;
+    bool is_boosted_p1;
+    bool is_boosted_p2;
+
+    void UpdateBoostTimers();
+    void ApplyBoostToPlayer(int playerNum);
 };

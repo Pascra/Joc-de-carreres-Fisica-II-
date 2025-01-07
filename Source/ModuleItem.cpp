@@ -19,27 +19,37 @@ bool ModuleItem::Start()
 {
     LOG("Loading item");
 
-    // Cargar textura del item
     item_texture = LoadTexture("Assets/nitro.png");
 
-    // Configurar el rectángulo de la animación
     frame_rec.x = 0;
     frame_rec.y = 0;
     frame_rec.width = (float)item_texture.width / 7;
     frame_rec.height = (float)item_texture.height;
 
-    // Posición inicial del item
-    item_position = { SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-
-    // Crear el sensor físico
+    // Item 1 en el centro
+    item_position = { SCREEN_WIDTH / 1.70f, SCREEN_HEIGHT / 2.3f };
     item_sensor = App->physics->CreateRectangleSensor(
         item_position.x,
         item_position.y + 10,
-        frame_rec.width * 0.63f,  
+        frame_rec.width * 0.63f,
         frame_rec.height * 0.63f
     );
     item_sensor->ctype = CollisionType::ITEM;
-    item_sensor->listener = this; 
+    item_sensor->listener = this;
+
+    // Item 2 en la parte inferior
+    item_position2 = { SCREEN_WIDTH / 2.4f, SCREEN_HEIGHT - 100.0f };
+    item_sensor2 = App->physics->CreateRectangleSensor(
+        item_position2.x,
+        item_position2.y + 10,
+        frame_rec.width * 0.63f,
+        frame_rec.height * 0.63f
+    );
+    item_sensor2->ctype = CollisionType::ITEM;
+    item_sensor2->listener = this;
+
+    item_active = true;
+    item_active2 = true;
 
     return true;
 }
@@ -48,10 +58,9 @@ update_status ModuleItem::Update()
 {
     float delta_time = GetFrameTime();
 
-    // Actualizar temporizadores de boost
     UpdateBoostTimers();
 
-    // Si el item está desactivado, actualizar el temporizador de reaparición
+    // Respawn item 1
     if (!item_active)
     {
         respawn_timer += delta_time;
@@ -59,42 +68,61 @@ update_status ModuleItem::Update()
         {
             item_active = true;
             respawn_timer = 0.0f;
-            // Reactivar el sensor
             if (item_sensor && item_sensor->body)
             {
                 item_sensor->body->GetFixtureList()->SetSensor(false);
             }
         }
     }
+
+    // Respawn item 2
+    if (!item_active2)
+    {
+        respawn_timer2 += delta_time;
+        if (respawn_timer2 >= respawn_time)
+        {
+            item_active2 = true;
+            respawn_timer2 = 0.0f;
+            if (item_sensor2 && item_sensor2->body)
+            {
+                item_sensor2->body->GetFixtureList()->SetSensor(false);
+            }
+        }
+    }
+
     if (App->game->IsGameOver())
     {
-        return UPDATE_CONTINUE; // Detener el dibujado de ítems si el juego ha terminado
+        return UPDATE_CONTINUE;
     }
-    // Si el item está activo, actualizar la animación y dibujarlo
+
+    // Actualizar animación
+    frames_counter++;
+    if (frames_counter >= (60 / frames_speed))
+    {
+        frames_counter = 0;
+        current_frame++;
+        if (current_frame > 7) current_frame = 0;
+        frame_rec.x = (float)current_frame * frame_rec.width;
+    }
+
+    // Dibujar item 1
     if (item_active)
     {
-        frames_counter++;
-        if (frames_counter >= (60 / frames_speed))
-        {
-            frames_counter = 0;
-            current_frame++;
-
-            if (current_frame > 7)
-                current_frame = 0;
-
-            frame_rec.x = (float)current_frame * frame_rec.width;
-        }
-
-        // Dibujar el item solo si está activo
-        DrawTexturePro(
-            item_texture,
+        DrawTexturePro(item_texture,
             frame_rec,
-            Rectangle{
-                item_position.x,
-                item_position.y,
-                frame_rec.width,
-                frame_rec.height
-            },
+            Rectangle{ item_position.x, item_position.y, frame_rec.width, frame_rec.height },
+            Vector2{ frame_rec.width / 2.0f, frame_rec.height / 2.0f },
+            0.0f,
+            WHITE
+        );
+    }
+
+    // Dibujar item 2
+    if (item_active2)
+    {
+        DrawTexturePro(item_texture,
+            frame_rec,
+            Rectangle{ item_position2.x, item_position2.y, frame_rec.width, frame_rec.height },
             Vector2{ frame_rec.width / 2.0f, frame_rec.height / 2.0f },
             0.0f,
             WHITE
@@ -137,35 +165,61 @@ void ModuleItem::UpdateBoostTimers()
 
 void ModuleItem::OnCollision(PhysBody* body1, PhysBody* body2)
 {
-    // Verificar que el item esté activo
-    if (!item_active) return;
+    if (!item_active && !item_active2) return;
 
     PhysBody* other_body = nullptr;
+    bool is_item1 = false;
+    bool is_item2 = false;
 
-    // Determinar cuál es el cuerpo del item y cuál es el otro
-    if (body1 == item_sensor)
-        other_body = body2;
-    else if (body2 == item_sensor)
-        other_body = body1;
-    else
-        return;
+    // Identificar el item
+    if (body1 == item_sensor || body2 == item_sensor)
+    {
+        other_body = (body1 == item_sensor) ? body2 : body1;
+        is_item1 = true;
+    }
+    else if (body1 == item_sensor2 || body2 == item_sensor2)
+    {
+        other_body = (body1 == item_sensor2) ? body2 : body1;
+        is_item2 = true;
+    }
 
-    // Verificar la colisión con los jugadores
+    if (!other_body) return;
+
+    // Procesar colisión para Player 1
     if (other_body->ctype == CollisionType::PLAYER1)
     {
-        LOG("Player 1 collected boost!");
-        ApplyBoostToPlayer(1);
+        if (is_item1 && item_active)
+        {
+            item_active = false;
+            respawn_timer = 0.0f;
+            if (item_sensor) item_sensor->body->GetFixtureList()->SetSensor(true);
+            ApplyBoostToPlayer(1);
+        }
+        else if (is_item2 && item_active2)
+        {
+            item_active2 = false;
+            respawn_timer2 = 0.0f;
+            if (item_sensor2) item_sensor2->body->GetFixtureList()->SetSensor(true);
+            ApplyBoostToPlayer(1);
+        }
     }
+    // Procesar colisión para Player 2
     else if (other_body->ctype == CollisionType::PLAYER2)
     {
-        LOG("Player 2 collected boost!");
-        ApplyBoostToPlayer(2);
-    }
-    // Ignorar explícitamente las colisiones con la IA
-    else if (other_body->ctype == CollisionType::AI)
-    {
-        LOG("AI collided with item - ignoring");
-        return;
+        if (is_item1 && item_active)
+        {
+            item_active = false;
+            respawn_timer = 0.0f;
+            if (item_sensor) item_sensor->body->GetFixtureList()->SetSensor(true);
+            ApplyBoostToPlayer(2);
+        }
+        else if (is_item2 && item_active2)
+        {
+            item_active2 = false;
+            respawn_timer2 = 0.0f;
+            if (item_sensor2) item_sensor2->body->GetFixtureList()->SetSensor(true);
+            ApplyBoostToPlayer(2);
+        }
     }
 }
 
