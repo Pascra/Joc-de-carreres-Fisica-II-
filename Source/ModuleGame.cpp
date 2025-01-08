@@ -402,6 +402,16 @@ bool ModuleGame::Start()
 {
     TraceLog(LOG_INFO, "Loading game assets");
 
+    // Cargar la textura de la introducción
+    intro_texture = LoadTexture("Assets/Portada.png");
+    if (intro_texture.id == 0)
+    {
+        TraceLog(LOG_ERROR, "Failed to load intro texture!");
+        return false;
+    }
+
+    // Lógica normal del juego
+
     entities.emplace_back(new Borde1(App->physics, 0, 0, this, default));
     entities.emplace_back(new Borde2(App->physics, 0, 0, this, default));
 
@@ -510,6 +520,29 @@ bool ModuleGame::Start()
 // Update
 update_status ModuleGame::Update()
 {
+
+    if (App->current_state == INTRO)
+    {
+        // Pantalla de introducción
+        DrawTexturePro(
+            intro_texture,
+            Rectangle{ 0.0f, 0.0f, (float)intro_texture.width, (float)intro_texture.height },
+            Rectangle{ 0.0f, 0.0f, (float)GetScreenWidth(), (float)GetScreenHeight() },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            App->current_state = PLAYING;
+        }
+
+        return UPDATE_CONTINUE;
+    }
+
+    // Si estamos en el estado PLAYING, ejecuta la lógica normal del juego
+
     if (player1_won)
     {
         DrawTexturePro(
@@ -763,6 +796,10 @@ void ModuleGame::DrawLaps() {
 bool ModuleGame::CleanUp()
 {
     TraceLog(LOG_INFO, "Unloading game assets");
+
+    // Liberar la textura de la introducción
+    UnloadTexture(intro_texture);
+
 
     // Liberar entidades físicas
     for (auto entity : entities)

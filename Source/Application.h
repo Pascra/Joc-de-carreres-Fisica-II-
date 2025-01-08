@@ -5,6 +5,12 @@
 #include "Timer.h"
 #include <vector>
 
+enum GameState
+{
+	INTRO,
+	PLAYING
+};
+
 class Module;
 class ModuleWindow;
 class ModuleRender;
@@ -25,6 +31,7 @@ public:
 	ModulePlayer* player;
 	ModuleItem* item;
 	ModuleGame* game;
+	GameState current_state = INTRO;
 
 private:
 

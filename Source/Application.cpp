@@ -128,11 +128,38 @@ update_status Application::Update()
         }
     }
 
-    if (WindowShouldClose())
-        ret = UPDATE_STOP;
+    // Si estamos en INTRO, solo actualizamos ModuleGame (pantalla de introducción)
+    if (current_state == INTRO)
+    {
+        if (game->IsEnabled())
+        {
+            ret = game->PreUpdate();
+            ret = game->Update();
+            ret = game->PostUpdate();
+        }
+    }
+    // Si estamos en PLAYING, actualizamos todos los módulos
+    else if (current_state == PLAYING)
+    {
+        for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
+        {
+            Module* module = *it;
+            if (module->IsEnabled())
+            {
+                ret = module->PreUpdate();
+                ret = module->Update();
+                ret = module->PostUpdate();
+            }
+        }
+    }
 
-    return ret;
+
+        if (WindowShouldClose())
+            ret = UPDATE_STOP;
+
+        return ret;
 }
+
 
 bool Application::CleanUp()
 {

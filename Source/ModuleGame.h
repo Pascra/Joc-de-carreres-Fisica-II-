@@ -42,6 +42,10 @@ public:
 
 
 private:
+
+    // Textura para la pantalla de introducción
+    Texture2D intro_texture;
+
     // Mapa
     Texture2D map_texture;
 

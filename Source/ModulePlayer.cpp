@@ -95,6 +95,10 @@ bool ModulePlayer::Start()
 // Update: Lógica de movimiento y dibujo del coche
 update_status ModulePlayer::Update()
 {
+    // Verificar si el estado no es PLAYING
+    if (App->current_state != PLAYING)
+        return UPDATE_CONTINUE;
+
     float delta_time = GetFrameTime();
 
     if(App->game->IsPlayer1Winner())
@@ -329,6 +333,10 @@ update_status ModulePlayer::Update()
 
 update_status ModulePlayer::PostUpdate()
 {
+    // Verificar si el estado no es PLAYING
+    if (App->current_state != PLAYING)
+        return UPDATE_CONTINUE;
+
     // Player 1
     b2Vec2 physicsPosition = car_body->body->GetPosition();
     car_position.x = METERS_TO_PIXELS(physicsPosition.x);

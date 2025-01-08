@@ -56,6 +56,11 @@ bool ModuleItem::Start()
 
 update_status ModuleItem::Update()
 {
+
+    // Verificar si el estado no es PLAYING
+    if (App->current_state != PLAYING)
+        return UPDATE_CONTINUE;
+
     float delta_time = GetFrameTime();
 
     UpdateBoostTimers();
