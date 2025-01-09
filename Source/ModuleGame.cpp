@@ -419,7 +419,7 @@ bool ModuleGame::Start()
     }
 
     // Load sound fx
-    boost_fx = App->audio->LoadFx("Assets/Boost.wav");
+
 
 
     // Load music
@@ -430,18 +430,40 @@ bool ModuleGame::Start()
         TraceLog(LOG_ERROR, "Failed to load intro music, continuing without it.");
     }
 
-    // Cargar música de cuenta regresiva con la ruta completa
+    // Cargar música de cuenta regresiva
     const char* countdownPath = "Assets/CountDown.wav";
     countdownMusic = LoadMusicStream(countdownPath);
     if (countdownMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
     }
 
+    const char* playerswinPath = "Assets/PlayersWin.wav";
+    playerswinMusic = LoadMusicStream(playerswinPath);
+    if (playerswinMusic.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
+    }
+
+    const char* aiwinsPath = "Assets/AIWins.wav";
+    aiwinsMusic = LoadMusicStream(aiwinsPath);
+    if (aiwinsMusic.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
+    }
+
+    const char* aiPath = "Assets/AI.wav";
+    aiMusic = LoadMusicStream(aiPath);
+    if (aiwinsMusic.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
+    }
+
 
     PlayMusicStream(introMusic);
     PlayMusicStream(countdownMusic);
+    PlayMusicStream(playerswinMusic);
+    PlayMusicStream(aiwinsMusic);
+    PlayMusicStream(aiMusic);
 
-    
+    SetMusicVolume(aiMusic, 0.2f);
+
 
     // Lógica normal del juego
 
@@ -618,6 +640,7 @@ update_status ModuleGame::Update()
         if (countdown_timer <= 0.0f)
         {
             App->current_state = PLAYING; // Cambia al estado PLAYING
+            StopMusicStream(countdownMusic);
 
         }
         else
@@ -658,6 +681,17 @@ update_status ModuleGame::Update()
         // Mostrar mensaje de ganador
         if (player1_won)
         {
+            // Actualiza el temporizador
+            player1WinMusicTimer += GetFrameTime(); // Incrementa el tiempo transcurrido
+
+            if (player1WinMusicTimer >= 2.0f) { // Si han pasado 3 segundos
+                StopMusicStream(playerswinMusic); // Detén la música
+            }
+            else {
+                UpdateMusicStream(playerswinMusic); // Sigue actualizando la música si aún no se detiene
+            }
+            UpdateMusicStream(playerswinMusic);
+
             DrawTexturePro(
                 player1_win_texture,
                 Rectangle{ 0.0f, 0.0f, (float)player1_win_texture.width, (float)player1_win_texture.height },
@@ -670,6 +704,16 @@ update_status ModuleGame::Update()
         }
         else if (player2_won)
         {
+            // Actualiza el temporizador
+            player2WinMusicTimer += GetFrameTime(); // Incrementa el tiempo transcurrido
+
+            if (player2WinMusicTimer >= 2.0f) { // Si han pasado 3 segundos
+                StopMusicStream(playerswinMusic); // Detén la música
+            }
+            else {
+                UpdateMusicStream(playerswinMusic); // Sigue actualizando la música si aún no se detiene
+            }
+
             DrawTexturePro(
                 player2_win_texture,
                 Rectangle{ 0.0f, 0.0f, (float)player2_win_texture.width, (float)player2_win_texture.height },
@@ -682,6 +726,15 @@ update_status ModuleGame::Update()
         }
         else if (Ai_won)
         {
+            // Actualiza el temporizador
+            AIWinMusicTimer += GetFrameTime(); // Incrementa el tiempo transcurrido
+
+            if (AIWinMusicTimer >= 4.0f) { // Si han pasado 3 segundos
+                StopMusicStream(aiwinsMusic); // Detén la música
+            }
+            else {
+                UpdateMusicStream(aiwinsMusic); // Sigue actualizando la música si aún no se detiene
+            }
             DrawTexturePro(
                 Ai_win_texture,
                 Rectangle{ 0.0f, 0.0f, (float)Ai_win_texture.width, (float)Ai_win_texture.height },
@@ -707,6 +760,10 @@ update_status ModuleGame::Update()
             current_checkpoint_player1 = 0;
             current_checkpoint_player2 = 0;
             current_checkpoint_ai = 0;
+
+            countdown_timer = 4.0f; // Reinicia el temporizador de cuenta atrás
+            PlayMusicStream(introMusic);
+            PlayMusicStream(countdownMusic);
 
             // Reiniciar posiciones de los jugadores
             App->player->ResetPositions();
@@ -777,6 +834,8 @@ update_status ModuleGame::Update()
         }
         else // Mover hacia el checkpoint
         {
+            UpdateMusicStream(aiMusic);
+
             direction_x /= distance; // Normalizar el vector dirección
             direction_y /= distance;
 
@@ -950,6 +1009,9 @@ bool ModuleGame::CleanUp()
     //Liberar musicas
     UnloadMusicStream(introMusic);
     UnloadMusicStream(countdownMusic);
+    UnloadMusicStream(playerswinMusic);
+    UnloadMusicStream(aiwinsMusic);
+    UnloadMusicStream(aiMusic);
 
     // Liberar entidades físicas
     for (auto entity : entities)

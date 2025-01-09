@@ -15,6 +15,7 @@ public:
     bool CleanUp() override;
     void OnCollision(PhysBody* body1, PhysBody* body2) override;
     
+    uint32 boost_fx;
 
 private:
     // Item 1

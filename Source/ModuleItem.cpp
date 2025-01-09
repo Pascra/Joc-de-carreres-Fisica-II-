@@ -3,6 +3,8 @@
 #include "ModulePlayer.h"
 #include "Globals.h"
 #include "ModuleGame.h"
+#include "ModuleAudio.h"
+
 ModuleItem::ModuleItem(Application* app, bool start_enabled) : Module(app, start_enabled),
 item_active(true), respawn_timer(0.0f), respawn_time(5.0f),
 current_frame(0), frames_counter(0), frames_speed(7),
@@ -20,6 +22,8 @@ bool ModuleItem::Start()
     LOG("Loading item");
 
     item_texture = LoadTexture("Assets/nitro.png");
+
+    boost_fx = App->audio->LoadFx("Assets/Boost.wav");
 
     frame_rec.x = 0;
     frame_rec.y = 0;
@@ -195,6 +199,8 @@ void ModuleItem::OnCollision(PhysBody* body1, PhysBody* body2)
     // Procesar colisión para Player 1
     if (other_body->ctype == CollisionType::PLAYER1)
     {
+        App->audio->PlayFx(boost_fx);
+
         if (is_item1 && item_active)
         {
             item_active = false;
@@ -213,6 +219,8 @@ void ModuleItem::OnCollision(PhysBody* body1, PhysBody* body2)
     // Procesar colisión para Player 2
     else if (other_body->ctype == CollisionType::PLAYER2)
     {
+        App->audio->PlayFx(boost_fx);
+
         if (is_item1 && item_active)
         {
             item_active = false;
@@ -262,5 +270,6 @@ bool ModuleItem::CleanUp()
 {
     LOG("Unloading item");
     UnloadTexture(item_texture);
+
     return true;
 }

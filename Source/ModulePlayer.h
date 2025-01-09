@@ -23,6 +23,8 @@ public:
     update_status PostUpdate() override;
     void ResetPositions();
 
+    uint32 derrape_fx;
+
 
 
 private:
@@ -65,4 +67,6 @@ private:
     PhysBody* player2_body;    // Cuerpo físico del jugador 2
 
     bool debug;                // Modo depuración
+
+    
 };

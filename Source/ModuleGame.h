@@ -40,11 +40,16 @@ public:
     void DrawLaps();
 
 
-    uint32 boost_fx;
 
     Music introMusic;
     Music countdownMusic;
+    Music playerswinMusic;
+    Music aiwinsMusic;
+    Music aiMusic;
  
+    float player2WinMusicTimer = 0.0f; // Inicializa el temporizador
+    float player1WinMusicTimer = 0.0f; // Inicializa el temporizador
+    float AIWinMusicTimer = 0.0f; // Inicializa el temporizador
 
 private:
 

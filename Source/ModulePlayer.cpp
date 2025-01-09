@@ -3,6 +3,7 @@
 #include "ModuleRender.h"
 #include "Globals.h"
 #include "ModuleGame.h"
+#include "ModuleAudio.h"
 
 // Constructor
 ModulePlayer::ModulePlayer(Application* app, bool start_enabled)
@@ -38,6 +39,8 @@ bool ModulePlayer::Start()
 {
     debug = false;
     LOG("Loading player assets");
+
+   
 
     // Cargar textura del jugador 1
     car_texture = LoadTexture("Assets/cars/pitstop_car_1.png");
@@ -114,9 +117,13 @@ update_status ModulePlayer::Update()
     float car_angle = car_body->body->GetAngle();
     float front_angle = car_angle - (90.0f * DEG2RAD);
 
+
+   
+
         // Control del Player 1
         if(IsKeyDown(KEY_W)) // Acelerar hacia adelante
         {
+            
             speed += acceleration * delta_time;
 
             // Limitar la velocidad máxima hacia adelante
@@ -129,6 +136,7 @@ update_status ModulePlayer::Update()
         }
         else if (IsKeyDown(KEY_S)) // Retroceder
         {
+            
             speed -= acceleration * delta_time;
 
             // Limitar la velocidad máxima en retroceso
@@ -217,6 +225,7 @@ update_status ModulePlayer::Update()
         // Control del Player 2
         if (IsKeyDown(KEY_UP))
         {
+            
             player2_speed += acceleration * delta_time;
 
             // Limitar la velocidad máxima hacia adelante
@@ -230,6 +239,7 @@ update_status ModulePlayer::Update()
 
         else if (IsKeyDown(KEY_DOWN))
         {
+            
             player2_speed -= acceleration * delta_time;
 
             // Limitar la velocidad máxima en retroceso
