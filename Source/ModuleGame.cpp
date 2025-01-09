@@ -5,6 +5,9 @@
 #include <cmath>
 #include "ModulePlayer.h"
 #include "ModulePhysics.h"
+#include "ModuleAudio.h"
+
+
 
 
 class PhysicEntity
@@ -400,7 +403,12 @@ ModuleGame::~ModuleGame() {}
 // Load assets
 bool ModuleGame::Start()
 {
+
+
     TraceLog(LOG_INFO, "Loading game assets");
+    bool ret = true;
+    App->current_state = INTRO;
+
 
     // Cargar la textura de la introducción
     intro_texture = LoadTexture("Assets/Portada.png");
@@ -409,6 +417,31 @@ bool ModuleGame::Start()
         TraceLog(LOG_ERROR, "Failed to load intro texture!");
         return false;
     }
+
+    // Load sound fx
+    boost_fx = App->audio->LoadFx("Assets/Boost.wav");
+
+
+    // Load music
+    // Cargar música de introducción
+    const char* introPath = "Assets/IntroMusic.wav";
+    introMusic = LoadMusicStream(introPath);
+    if (introMusic.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load intro music, continuing without it.");
+    }
+
+    // Cargar música de cuenta regresiva con la ruta completa
+    const char* countdownPath = "Assets/CountDown.wav";
+    countdownMusic = LoadMusicStream(countdownPath);
+    if (countdownMusic.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
+    }
+
+
+    PlayMusicStream(introMusic);
+    PlayMusicStream(countdownMusic);
+
+    
 
     // Lógica normal del juego
 
@@ -533,23 +566,28 @@ update_status ModuleGame::Update()
             WHITE
         );
 
-        if (App->current_state == INTRO)
-        {
-            if (IsKeyPressed(KEY_ENTER))
-            {
-                App->current_state = COUNTDOWN;
-                
-            }
-        }
+        
 
+        // Actualiza el flujo de la música
+        UpdateMusicStream(introMusic);
+
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            App->current_state = COUNTDOWN;
+            StopMusicStream(introMusic); // Detén la música de introducción al cambiar de estado
+           
+        }
 
         return UPDATE_CONTINUE;
     }
+
+
 
     // Si estamos en el estado PLAYING, ejecuta la lógica normal del juego
 
     if (App->current_state == COUNTDOWN)
     {
+        UpdateMusicStream(countdownMusic);
         // Dibuja el mapa en lugar de un fondo blanco
         DrawTexturePro(
             map_texture,
@@ -580,21 +618,33 @@ update_status ModuleGame::Update()
         if (countdown_timer <= 0.0f)
         {
             App->current_state = PLAYING; // Cambia al estado PLAYING
+
         }
         else
         {
-            // Muestra el texto de cuenta atrás encima del mapa
-            int seconds_left = (int)ceil(countdown_timer);
-            char countdown_text[4];
+        // Muestra el texto de cuenta atrás encima del mapa
+        int seconds_left = (int)ceil(countdown_timer) - 1; // Restar 1 al número mostrado
+
+        char countdown_text[16]; // Espacio extra para "GO"
+
+        if (seconds_left > 0) {
             snprintf(countdown_text, sizeof(countdown_text), "%d", seconds_left);
-            DrawText(
-                countdown_text,
-                SCREEN_WIDTH / 2 - 20,
-                SCREEN_HEIGHT / 2 - 20,
-                40,
-                WHITE
-            );
         }
+        else {
+            snprintf(countdown_text, sizeof(countdown_text), "GO!");
+        }
+
+        DrawText(
+            countdown_text,
+            SCREEN_WIDTH / 2 - 20,
+            SCREEN_HEIGHT / 2 - 20,
+            40,
+            WHITE
+        );
+
+        }
+
+        
 
         return UPDATE_CONTINUE;
     }
@@ -604,6 +654,7 @@ update_status ModuleGame::Update()
 
     if (App->current_state == GAMEOVER)
     {
+
         // Mostrar mensaje de ganador
         if (player1_won)
         {
@@ -896,7 +947,9 @@ bool ModuleGame::CleanUp()
 
     // Liberar la textura de la introducción
     UnloadTexture(intro_texture);
-
+    //Liberar musicas
+    UnloadMusicStream(introMusic);
+    UnloadMusicStream(countdownMusic);
 
     // Liberar entidades físicas
     for (auto entity : entities)
@@ -925,6 +978,7 @@ bool ModuleGame::CleanUp()
     UnloadTexture(player1_win_texture);
     UnloadTexture(player2_win_texture);
     UnloadTexture(Ai_win_texture);
+
 
     return true;
 }

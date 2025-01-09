@@ -20,34 +20,37 @@ ModuleAudio::~ModuleAudio()
 bool ModuleAudio::Init()
 {
 	LOG("Loading Audio Mixer");
-	bool ret = true;
 
-    LOG("Loading raylib audio system");
+	InitAudioDevice();
+	if (!IsAudioDeviceReady())
+	{
+		LOG("Error: Audio device could not be initialized");
+		return false;
+	}
 
-    InitAudioDevice();
-
-	return ret;
+	return true;
 }
+
 
 // Called before quitting
 bool ModuleAudio::CleanUp()
 {
 	LOG("Freeing sound FX, closing Mixer and Audio subsystem");
 
-    // Unload sounds
+	// Unload sounds
 	for (unsigned int i = 0; i < fx_count; i++)
 	{
 		UnloadSound(fx[i]);
 	}
 
-    // Unload music
+	// Unload music
 	if (IsMusicReady(music))
 	{
 		StopMusicStream(music);
 		UnloadMusicStream(music);
 	}
 
-    CloseAudioDevice();
+	CloseAudioDevice();
 
 	return true;
 }

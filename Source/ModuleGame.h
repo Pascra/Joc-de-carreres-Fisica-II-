@@ -38,10 +38,13 @@ public:
     Texture2D default;
 
     void DrawLaps();
-    
-    
 
 
+    uint32 boost_fx;
+
+    Music introMusic;
+    Music countdownMusic;
+ 
 
 private:
 
@@ -75,7 +78,7 @@ private:
 
     void MoveAI(float deltaTime);
 
-    float countdown_timer = 3.0f; // Inicia con 3 segundos
+    float countdown_timer = 4.0f; // Inicia con 3 segundos
 
     //Time
     float time;
