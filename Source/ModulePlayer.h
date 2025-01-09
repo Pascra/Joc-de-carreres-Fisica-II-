@@ -21,6 +21,8 @@ public:
     void ApplySpeedBoost(int playerNum);
     void RestoreSpeedBoost(int playerNum);
     update_status PostUpdate() override;
+    void ResetPositions();
+
 
 
 private:

@@ -543,45 +543,82 @@ update_status ModuleGame::Update()
 
     // Si estamos en el estado PLAYING, ejecuta la lógica normal del juego
 
-    if (player1_won)
+   
+
+
+    if (App->current_state == GAMEOVER)
     {
-        DrawTexturePro(
-            player1_win_texture,
-            Rectangle{ 0.0f, 0.0f, (float)player1_win_texture.width, (float)player1_win_texture.height },
-            Rectangle{ (float)SCREEN_WIDTH / 2 - player1_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player1_win_texture.height / 2,
-                       (float)player1_win_texture.width, (float)player1_win_texture.height },
-            Vector2{ 0.0f, 0.0f },
-            0.0f,
-            WHITE
-        );
-        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
+        // Mostrar mensaje de ganador
+        if (player1_won)
+        {
+            DrawTexturePro(
+                player1_win_texture,
+                Rectangle{ 0.0f, 0.0f, (float)player1_win_texture.width, (float)player1_win_texture.height },
+                Rectangle{ (float)SCREEN_WIDTH / 2 - player1_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player1_win_texture.height / 2,
+                           (float)player1_win_texture.width, (float)player1_win_texture.height },
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+        }
+        else if (player2_won)
+        {
+            DrawTexturePro(
+                player2_win_texture,
+                Rectangle{ 0.0f, 0.0f, (float)player2_win_texture.width, (float)player2_win_texture.height },
+                Rectangle{ (float)SCREEN_WIDTH / 2 - player2_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player2_win_texture.height / 2,
+                           (float)player2_win_texture.width, (float)player2_win_texture.height },
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+        }
+        else if (Ai_won)
+        {
+            DrawTexturePro(
+                Ai_win_texture,
+                Rectangle{ 0.0f, 0.0f, (float)Ai_win_texture.width, (float)Ai_win_texture.height },
+                Rectangle{ (float)SCREEN_WIDTH / 2 - Ai_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - Ai_win_texture.height / 2,
+                           (float)Ai_win_texture.width, (float)Ai_win_texture.height },
+                Vector2{ 0.0f, 0.0f },
+                0.0f,
+                WHITE
+            );
+        }
+
+        // Detectar si se presiona Enter para volver al estado INTRO
+        if (IsKeyPressed(KEY_ENTER))
+        {
+            player1_won = false;
+            player2_won = false;
+            Ai_won = false;
+
+            // Reiniciar variables necesarias para empezar de nuevo
+            laps_player1 = 0;
+            laps_player2 = 0;
+            laps_ai = 0;
+            current_checkpoint_player1 = 0;
+            current_checkpoint_player2 = 0;
+            current_checkpoint_ai = 0;
+
+            // Reiniciar posiciones de los jugadores
+            App->player->ResetPositions();
+
+            // Reiniciar IA
+            ai_position = { 913.7f, 525.0f }; // Posición inicial
+            ai_rotation = 270.0f;             // Rotación inicial
+            ai_speed = 0.0f;
+
+            // Cambiar al estado INTRO
+            App->current_state = INTRO;
+        }
+
+        return UPDATE_CONTINUE;
     }
-    if (player2_won)
-    {
-        DrawTexturePro(
-            player2_win_texture,
-            Rectangle{ 0.0f, 0.0f, (float)player2_win_texture.width, (float)player2_win_texture.height },
-            Rectangle{ (float)SCREEN_WIDTH / 2 - player2_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - player2_win_texture.height / 2,
-                       (float)player2_win_texture.width, (float)player2_win_texture.height },
-            Vector2{ 0.0f, 0.0f },
-            0.0f,
-            WHITE
-        );
-        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
-    }
-    if (Ai_won)
-    {
-        DrawTexturePro(
-            Ai_win_texture,
-            Rectangle{ 0.0f, 0.0f, (float)Ai_win_texture.width, (float)Ai_win_texture.height },
-            Rectangle{ (float)SCREEN_WIDTH / 2 - Ai_win_texture.width / 2, (float)SCREEN_HEIGHT / 2 - Ai_win_texture.height / 2,
-                       (float)Ai_win_texture.width, (float)Ai_win_texture.height },
-            Vector2{ 0.0f, 0.0f },
-            0.0f,
-            WHITE
-        );
-        return UPDATE_CONTINUE; // Salir del método sin dibujar otros elementos
-    }
+
+
+
+
 
     // Dibujar el mapa
     DrawTexturePro(
@@ -627,6 +664,7 @@ update_status ModuleGame::Update()
                 {
                     TraceLog(LOG_INFO, "AI WINS!");
                     Ai_won = true;
+                    App->current_state = GAMEOVER; // Cambiar al estado GAMEOVER
                 }
             }
         }
@@ -691,6 +729,7 @@ update_status ModuleGame::Update()
 }
 
 
+
 // OnCollision
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
 {
@@ -706,6 +745,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             {
                 TraceLog(LOG_INFO, "Player 1 WINS!");
                 player1_won = true;
+                App->current_state = GAMEOVER; // Cambiar al estado GAMEOVER
             }
         }
 
@@ -719,6 +759,7 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             {
                 TraceLog(LOG_INFO, "Player 2 WINS!");
                 player2_won = true;
+                App->current_state = GAMEOVER; // Cambiar al estado GAMEOVER
                 // Lógica adicional si es necesario cuando el Player 2 gana.
             }
         }

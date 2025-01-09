@@ -8,7 +8,8 @@
 enum GameState
 {
 	INTRO,
-	PLAYING
+	PLAYING,
+	GAMEOVER
 };
 
 class Module;

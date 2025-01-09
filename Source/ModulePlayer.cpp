@@ -375,6 +375,42 @@ update_status ModulePlayer::PostUpdate()
     return UPDATE_CONTINUE;
 }
 
+void ModulePlayer::ResetPositions()
+{
+    float scale = 0.2f;
+    // Resetear las posiciones iniciales de Player 1
+    car_position.x = (1920.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
+    car_position.y = (1144.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
+    car_body = App->physics->CreateRectangle(
+        car_position.x,
+        car_position.y,
+        car_texture2.width * scale * 0.2f,
+        car_texture2.height * scale * 0.2f
+    );
+    car_body->ctype = CollisionType::PLAYER1;
+    car_rotation = 180.0f;
+    speed = 0.0f;
+    car_body->body->SetGravityScale(0);
+
+    // Inicializar jugador 2
+    player2_position.x = 862.0f;
+    player2_position.y = 484.0f;
+    player2_body = App->physics->CreateRectangle(
+        player2_position.x,
+        player2_position.y,
+        car_texture2.width * scale * 0.2f,
+        car_texture2.height * scale * 0.2f
+    );
+    player2_body->ctype = CollisionType::PLAYER2;
+    player2_rotation = 180.0f;
+    player2_speed = 0.0f;
+    player2_body->body->SetGravityScale(0);
+
+    LOG("Player positions and states reset.");
+}
+
+
+
 // Métodos públicos para obtener datos
 Vector2 ModulePlayer::GetCarPosition() const
 {
