@@ -481,7 +481,7 @@ bool ModuleGame::Start()
     finish_line->listener = this;
 
     // Configuración inicial de la IA
-    ai_position = { 913.7f, 525.0f }; // Cambia estas coordenadas según lo que desees
+    ai_position = { 913.7f, 535.0f }; // Cambia estas coordenadas según lo que desees
     ai_rotation = 270.0f;             // Rotación inicial hacia la derecha
     ai_speed = 0.0f;
 
@@ -533,17 +533,73 @@ update_status ModuleGame::Update()
             WHITE
         );
 
-        if (IsKeyPressed(KEY_ENTER))
+        if (App->current_state == INTRO)
         {
-            App->current_state = PLAYING;
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                App->current_state = COUNTDOWN;
+                
+            }
         }
+
 
         return UPDATE_CONTINUE;
     }
 
     // Si estamos en el estado PLAYING, ejecuta la lógica normal del juego
 
-   
+    if (App->current_state == COUNTDOWN)
+    {
+        // Dibuja el mapa en lugar de un fondo blanco
+        DrawTexturePro(
+            map_texture,
+            Rectangle{ 0.0f, 0.0f, (float)map_texture.width, (float)map_texture.height },
+            Rectangle{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT },
+            Vector2{ 0.0f, 0.0f },
+            0.0f,
+            WHITE
+        );
+
+        // Dibujar la textura de la IA
+        float scale = 0.06f;
+        Vector2 sprite_offset = {
+            (float)ai_texture.width * scale / 2.0f,
+            (float)ai_texture.height * scale / 2.0f };
+
+        DrawTexturePro(
+            ai_texture,
+            Rectangle{ 0.0f, 0.0f, (float)ai_texture.width, (float)ai_texture.height },
+            Rectangle{ ai_position.x, ai_position.y, (float)ai_texture.width * scale, (float)ai_texture.height * scale },
+            sprite_offset,
+            ai_rotation - 90.0f, // Ajuste de orientación
+            WHITE);
+
+        // Lógica de cuenta atrás
+        countdown_timer -= GetFrameTime();
+
+        if (countdown_timer <= 0.0f)
+        {
+            App->current_state = PLAYING; // Cambia al estado PLAYING
+        }
+        else
+        {
+            // Muestra el texto de cuenta atrás encima del mapa
+            int seconds_left = (int)ceil(countdown_timer);
+            char countdown_text[4];
+            snprintf(countdown_text, sizeof(countdown_text), "%d", seconds_left);
+            DrawText(
+                countdown_text,
+                SCREEN_WIDTH / 2 - 20,
+                SCREEN_HEIGHT / 2 - 20,
+                40,
+                WHITE
+            );
+        }
+
+        return UPDATE_CONTINUE;
+    }
+
+
 
 
     if (App->current_state == GAMEOVER)
@@ -605,7 +661,7 @@ update_status ModuleGame::Update()
             App->player->ResetPositions();
 
             // Reiniciar IA
-            ai_position = { 913.7f, 525.0f }; // Posición inicial
+            ai_position = { 913.7f, 535.0f }; // Posición inicial
             ai_rotation = 270.0f;             // Rotación inicial
             ai_speed = 0.0f;
 

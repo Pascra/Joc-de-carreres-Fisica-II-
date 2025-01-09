@@ -8,9 +8,11 @@
 enum GameState
 {
 	INTRO,
+	COUNTDOWN,
 	PLAYING,
 	GAMEOVER
 };
+
 
 class Module;
 class ModuleWindow;

@@ -39,6 +39,7 @@ public:
 
     void DrawLaps();
     
+    
 
 
 
@@ -74,6 +75,7 @@ private:
 
     void MoveAI(float deltaTime);
 
+    float countdown_timer = 3.0f; // Inicia con 3 segundos
 
     //Time
     float time;

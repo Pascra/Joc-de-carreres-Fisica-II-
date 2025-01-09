@@ -333,9 +333,10 @@ update_status ModulePlayer::Update()
 
 update_status ModulePlayer::PostUpdate()
 {
-    // Verificar si el estado no es PLAYING
-    if (App->current_state != PLAYING)
+    // Verificar si el estado no es COUNTDOWN o PLAYING
+    if (App->current_state != COUNTDOWN && App->current_state != PLAYING)
         return UPDATE_CONTINUE;
+
 
     // Player 1
     b2Vec2 physicsPosition = car_body->body->GetPosition();
