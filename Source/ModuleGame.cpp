@@ -418,9 +418,6 @@ bool ModuleGame::Start()
         return false;
     }
 
-    // Load sound fx
-
-
 
     // Load music
     // Cargar música de introducción
@@ -588,7 +585,14 @@ update_status ModuleGame::Update()
             WHITE
         );
 
-        
+        // Mostrar el texto "PRESS ENTER" en la parte inferior de la pantalla
+        const char* pressEnterText = "PRESS ENTER";
+        int fontSize = 24; // Tamaño de la fuente
+        int textWidth = MeasureText(pressEnterText, fontSize); // Ancho del texto
+        int posX = (GetScreenWidth() - textWidth) / 2; // Centrar en X
+        int posY = GetScreenHeight() - 50; // Ubicar cerca de la parte inferior
+
+        DrawText(pressEnterText, posX, posY, fontSize, WHITE);
 
         // Actualiza el flujo de la música
         UpdateMusicStream(introMusic);
@@ -597,12 +601,10 @@ update_status ModuleGame::Update()
         {
             App->current_state = COUNTDOWN;
             StopMusicStream(introMusic); // Detén la música de introducción al cambiar de estado
-           
         }
 
         return UPDATE_CONTINUE;
     }
-
 
 
     // Si estamos en el estado PLAYING, ejecuta la lógica normal del juego
@@ -673,11 +675,8 @@ update_status ModuleGame::Update()
     }
 
 
-
-
     if (App->current_state == GAMEOVER)
     {
-
         // Mostrar mensaje de ganador
         if (player1_won)
         {
@@ -690,7 +689,6 @@ update_status ModuleGame::Update()
             else {
                 UpdateMusicStream(playerswinMusic); // Sigue actualizando la música si aún no se detiene
             }
-            UpdateMusicStream(playerswinMusic);
 
             DrawTexturePro(
                 player1_win_texture,
@@ -701,6 +699,7 @@ update_status ModuleGame::Update()
                 0.0f,
                 WHITE
             );
+
         }
         else if (player2_won)
         {
@@ -735,6 +734,7 @@ update_status ModuleGame::Update()
             else {
                 UpdateMusicStream(aiwinsMusic); // Sigue actualizando la música si aún no se detiene
             }
+
             DrawTexturePro(
                 Ai_win_texture,
                 Rectangle{ 0.0f, 0.0f, (float)Ai_win_texture.width, (float)Ai_win_texture.height },
@@ -745,6 +745,15 @@ update_status ModuleGame::Update()
                 WHITE
             );
         }
+
+        // Mostrar el texto "PRESS ENTER" en la parte inferior de la pantalla
+        const char* pressEnterText = "PRESS ENTER";
+        int fontSize = 30; // Tamaño de la fuente
+        int textWidth = MeasureText(pressEnterText, fontSize); // Ancho del texto
+        int posX = (GetScreenWidth() - textWidth) / 2; // Centrar en X
+        int posY = GetScreenHeight() - 100; // Ubicar cerca de la parte inferior
+
+        DrawText(pressEnterText, posX, posY, fontSize, WHITE);
 
         // Detectar si se presiona Enter para volver al estado INTRO
         if (IsKeyPressed(KEY_ENTER))
@@ -779,8 +788,6 @@ update_status ModuleGame::Update()
 
         return UPDATE_CONTINUE;
     }
-
-
 
 
 
