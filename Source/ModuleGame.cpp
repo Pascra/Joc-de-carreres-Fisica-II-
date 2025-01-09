@@ -411,7 +411,7 @@ bool ModuleGame::Start()
 
 
     // Cargar la textura de la introducción
-    intro_texture = LoadTexture("Assets/Portada.png");
+    intro_texture = LoadTexture("Assets/Texturas/Portada.png");
     if (intro_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load intro texture!");
@@ -421,32 +421,32 @@ bool ModuleGame::Start()
 
     // Load music
     // Cargar música de introducción
-    const char* introPath = "Assets/IntroMusic.wav";
+    const char* introPath = "Assets/Audios/IntroMusic.wav";
     introMusic = LoadMusicStream(introPath);
     if (introMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load intro music, continuing without it.");
     }
 
     // Cargar música de cuenta regresiva
-    const char* countdownPath = "Assets/CountDown.wav";
+    const char* countdownPath = "Assets/Audios/CountDown.wav";
     countdownMusic = LoadMusicStream(countdownPath);
     if (countdownMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
     }
 
-    const char* playerswinPath = "Assets/PlayersWin.wav";
+    const char* playerswinPath = "Assets/Audios/PlayersWin.wav";
     playerswinMusic = LoadMusicStream(playerswinPath);
     if (playerswinMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
     }
 
-    const char* aiwinsPath = "Assets/AIWins.wav";
+    const char* aiwinsPath = "Assets/Audios/AIWins.wav";
     aiwinsMusic = LoadMusicStream(aiwinsPath);
     if (aiwinsMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
     }
 
-    const char* aiPath = "Assets/AI.wav";
+    const char* aiPath = "Assets/Audios/AI.wav";
     aiMusic = LoadMusicStream(aiPath);
     if (aiwinsMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load countdown music, continuing without it.");
@@ -467,19 +467,19 @@ bool ModuleGame::Start()
     entities.emplace_back(new Borde1(App->physics, 0, 0, this, default));
     entities.emplace_back(new Borde2(App->physics, 0, 0, this, default));
 
-    player1_win_texture = LoadTexture("Assets/player1_gana.png");
+    player1_win_texture = LoadTexture("Assets/Texturas/player1_gana.png");
     if (player1_win_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load Player 1 win texture!");
         return false;
     }
-    player2_win_texture = LoadTexture("Assets/player2_gana.png");
+    player2_win_texture = LoadTexture("Assets/Texturas/player2_gana.png");
     if (player1_win_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load Player 2 win texture!");
         return false;
     }
-    Ai_win_texture = LoadTexture("Assets/AI_gana.png");
+    Ai_win_texture = LoadTexture("Assets/Texturas/AI_gana.png");
     if (Ai_win_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load Ai win texture!");
@@ -487,7 +487,7 @@ bool ModuleGame::Start()
     }
 
     // Cargar la textura del mapa
-    map_texture = LoadTexture("Assets/MapaCarreras.png");
+    map_texture = LoadTexture("Assets/Texturas/MapaCarreras.png");
     if (map_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load map texture!");
@@ -495,7 +495,7 @@ bool ModuleGame::Start()
     }
 
     // Cargar textura del coche de la IA
-    ai_texture = LoadTexture("Assets/cars/pitstop_car_3.png");
+    ai_texture = LoadTexture("Assets/Texturas/cars/pitstop_car_3.png");
     if (ai_texture.id == 0)
     {
         TraceLog(LOG_ERROR, "Failed to load AI car texture!");

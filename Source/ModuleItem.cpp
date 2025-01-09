@@ -21,9 +21,9 @@ bool ModuleItem::Start()
 {
     LOG("Loading item");
 
-    item_texture = LoadTexture("Assets/nitro.png");
+    item_texture = LoadTexture("Assets/Texturas/nitro.png");
 
-    boost_fx = App->audio->LoadFx("Assets/Boost.wav");
+    boost_fx = App->audio->LoadFx("Assets/Audios/Boost.wav");
 
     frame_rec.x = 0;
     frame_rec.y = 0;

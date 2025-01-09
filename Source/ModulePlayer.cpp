@@ -43,7 +43,7 @@ bool ModulePlayer::Start()
    
 
     // Cargar textura del jugador 1
-    car_texture = LoadTexture("Assets/cars/pitstop_car_1.png");
+    car_texture = LoadTexture("Assets/Texturas/cars/pitstop_car_1.png");
     if (car_texture.id == 0)
     {
         LOG("ERROR: Failed to load car texture for Player 1!");
@@ -51,7 +51,7 @@ bool ModulePlayer::Start()
     }
 
     // Cargar textura del jugador 2
-    car_texture2 = LoadTexture("Assets/cars/pitstop_car_2.png");
+    car_texture2 = LoadTexture("Assets/Texturas/cars/pitstop_car_2.png");
     if (car_texture2.id == 0)
     {
         LOG("ERROR: Failed to load car texture for Player 2!");
