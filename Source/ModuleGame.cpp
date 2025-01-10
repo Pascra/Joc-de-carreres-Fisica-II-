@@ -1011,26 +1011,40 @@ bool ModuleGame::CleanUp()
 {
     TraceLog(LOG_INFO, "Unloading game assets");
 
-    // Liberar la textura de la introducción
-    UnloadTexture(intro_texture);
-    //Liberar musicas
-    UnloadMusicStream(introMusic);
-    UnloadMusicStream(countdownMusic);
-    UnloadMusicStream(playerswinMusic);
-    UnloadMusicStream(aiwinsMusic);
-    UnloadMusicStream(aiMusic);
+    // Liberar texturas
+    if (intro_texture.id != 0) UnloadTexture(intro_texture);
+    if (map_texture.id != 0) UnloadTexture(map_texture);
+    if (ai_texture.id != 0) UnloadTexture(ai_texture);
+    if (player1_win_texture.id != 0) UnloadTexture(player1_win_texture);
+    if (player2_win_texture.id != 0) UnloadTexture(player2_win_texture);
+    if (Ai_win_texture.id != 0) UnloadTexture(Ai_win_texture);
 
-    // Liberar entidades físicas
+    // Liberar músicas
+    if (introMusic.stream.buffer != NULL) UnloadMusicStream(introMusic);
+    if (countdownMusic.stream.buffer != NULL) UnloadMusicStream(countdownMusic);
+    if (playerswinMusic.stream.buffer != NULL) UnloadMusicStream(playerswinMusic);
+    if (aiwinsMusic.stream.buffer != NULL) UnloadMusicStream(aiwinsMusic);
+    if (aiMusic.stream.buffer != NULL) UnloadMusicStream(aiMusic);
+
+    // Liberar entidades
     for (auto entity : entities)
     {
-        delete entity;
+        if (entity)
+        {
+            delete entity;
+            entity = nullptr;
+        }
     }
     entities.clear();
 
     // Liberar sensores de checkpoints
     for (auto sensor : checkpoint_sensors)
     {
-        delete sensor;
+        if (sensor)
+        {
+            delete sensor;
+            sensor = nullptr;
+        }
     }
     checkpoint_sensors.clear();
 
@@ -1041,16 +1055,18 @@ bool ModuleGame::CleanUp()
         finish_line = nullptr;
     }
 
-    // Liberar texturas cargadas
-    UnloadTexture(map_texture);
-    UnloadTexture(ai_texture);
-    UnloadTexture(player1_win_texture);
-    UnloadTexture(player2_win_texture);
-    UnloadTexture(Ai_win_texture);
+    // Liberar cuerpo de la IA
+    if (ai_body)
+    {
+        delete ai_body;
+        ai_body = nullptr;
+    }
 
+    TraceLog(LOG_INFO, "Game assets unloaded successfully");
 
     return true;
 }
+
 
 
 

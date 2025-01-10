@@ -40,14 +40,21 @@ bool ModuleAudio::CleanUp()
 	// Unload sounds
 	for (unsigned int i = 0; i < fx_count; i++)
 	{
-		UnloadSound(fx[i]);
+		if (fx[i].stream.buffer != nullptr)
+		{
+			UnloadSound(fx[i]);
+			fx[i] = Sound{ 0 }; // Restablece para evitar accesos no válidos
+		}
 	}
+
+	fx_count = 0; // Reinicia el contador de sonidos
 
 	// Unload music
 	if (IsMusicReady(music))
 	{
 		StopMusicStream(music);
 		UnloadMusicStream(music);
+		music = Music{ 0 }; // Restablece para evitar problemas
 	}
 
 	CloseAudioDevice();

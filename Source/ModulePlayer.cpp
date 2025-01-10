@@ -388,8 +388,23 @@ update_status ModulePlayer::PostUpdate()
 
 void ModulePlayer::ResetPositions()
 {
+    // Limpiar cuerpos físicos existentes
+    if (car_body != nullptr)
+    {
+        App->physics->world->DestroyBody(car_body->body); // Destruye el cuerpo físico actual
+        delete car_body;
+        car_body = nullptr;
+    }
+    if (player2_body != nullptr)
+    {
+        App->physics->world->DestroyBody(player2_body->body); // Destruye el cuerpo físico actual
+        delete player2_body;
+        player2_body = nullptr;
+    }
+
     float scale = 0.2f;
-    // Resetear las posiciones iniciales de Player 1
+
+    // Reiniciar Player 1
     car_position.x = (1920.0f / 2.0f) - ((car_texture.width * scale) / 2.0f);
     car_position.y = (1144.0f / 2.0f) - ((car_texture.height * scale) / 2.0f);
     car_body = App->physics->CreateRectangle(
@@ -403,7 +418,7 @@ void ModulePlayer::ResetPositions()
     speed = 0.0f;
     car_body->body->SetGravityScale(0);
 
-    // Inicializar jugador 2
+    // Reiniciar Player 2
     player2_position.x = 862.0f;
     player2_position.y = 484.0f;
     player2_body = App->physics->CreateRectangle(
@@ -483,17 +498,16 @@ bool ModulePlayer::CleanUp()
     }
 
     // Destruir el cuerpo físico de Player 2
-    if (car_body != nullptr)
+    if (player2_body != nullptr) // Corrige el uso de player2_body
     {
-        if (car_body->body != nullptr)
+        if (player2_body->body != nullptr)
         {
-            App->physics->GetWorld()->DestroyBody(car_body->body); // Usar el método público
-            car_body->body = nullptr;
+            App->physics->world->DestroyBody(player2_body->body); // Destruye el cuerpo Box2D
+            player2_body->body = nullptr;
         }
-        delete car_body;
-        car_body = nullptr;
+        delete player2_body; // Libera el objeto PhysBody
+        player2_body = nullptr; // Evita punteros colgantes
     }
-
 
     // Liberar texturas cargadas
     if (car_texture.id != 0)

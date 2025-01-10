@@ -269,7 +269,27 @@ void ModuleItem::ApplyBoostToPlayer(int playerNum)
 bool ModuleItem::CleanUp()
 {
     LOG("Unloading item");
-    UnloadTexture(item_texture);
+
+    // Liberar textura
+    if (item_texture.id != 0)
+    {
+        UnloadTexture(item_texture);
+        item_texture.id = 0;
+    }
+
+    // Liberar sensores físicos
+    if (item_sensor)
+    {
+        delete item_sensor;
+        item_sensor = nullptr;
+    }
+
+    if (item_sensor2)
+    {
+        delete item_sensor2;
+        item_sensor2 = nullptr;
+    }
 
     return true;
 }
+

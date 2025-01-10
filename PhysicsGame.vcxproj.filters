@@ -28,9 +28,6 @@
     <ClCompile Include="Source\ModuleGame.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Source.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Source\ModulePlayer.cpp">
       <Filter>Sources</Filter>
     </ClCompile>

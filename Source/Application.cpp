@@ -50,7 +50,7 @@ Application::~Application()
         {
             TraceLog(LOG_INFO, "Deleting module: %p", item);
             delete item; // Elimina cada módulo
-            *it = nullptr; // Establece el puntero a nullptr para evitar dangling pointers
+            *it = nullptr; // Evita dangling pointers
         }
     }
 
@@ -59,7 +59,7 @@ Application::~Application()
     {
         TraceLog(LOG_INFO, "Deleting game module.");
         delete game;
-        game = nullptr; // Limpia el puntero de `game`
+        game = nullptr; // Limpia el puntero
     }
 
     // Limpiar la lista de módulos
@@ -67,11 +67,12 @@ Application::~Application()
     TraceLog(LOG_INFO, "Application shutdown complete.");
 }
 
+
 bool Application::Init()
 {
     bool ret = true;
 
-    // Call Init() in all modules
+    // Call Init() en todos los módulos
     for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
     {
         Module* module = *it;
@@ -81,7 +82,7 @@ bool Application::Init()
         }
     }
 
-    // After all Init calls we call Start() in all modules
+    // After all Init calls, call Start() en todos los módulos
     LOG("Application Start --------------");
 
     for (auto it = list_modules.begin(); it != list_modules.end() && ret; ++it)
@@ -95,6 +96,7 @@ bool Application::Init()
 
     return ret;
 }
+
 
 // Call PreUpdate, Update and PostUpdate on all modules
 update_status Application::Update()
@@ -128,48 +130,27 @@ update_status Application::Update()
         }
     }
 
-    // Si estamos en INTRO, solo actualizamos ModuleGame (pantalla de introducción)
-    if (current_state == INTRO)
-    {
-        if (game->IsEnabled())
-        {
-            ret = game->PreUpdate();
-            ret = game->Update();
-            ret = game->PostUpdate();
-        }
-    }
-    // Si estamos en PLAYING, actualizamos todos los módulos
-    else if (current_state == PLAYING)
-    {
-        for (auto it = list_modules.begin(); it != list_modules.end() && ret == UPDATE_CONTINUE; ++it)
-        {
-            Module* module = *it;
-            if (module->IsEnabled())
-            {
-                ret = module->PreUpdate();
-                ret = module->Update();
-                ret = module->PostUpdate();
-            }
-        }
-    }
+    if (WindowShouldClose())
+        ret = UPDATE_STOP;
 
-
-        if (WindowShouldClose())
-            ret = UPDATE_STOP;
-
-        return ret;
+    return ret;
 }
 
 
 bool Application::CleanUp()
 {
     bool ret = true;
+
     for (auto it = list_modules.rbegin(); it != list_modules.rend() && ret; ++it)
     {
         Module* item = *it;
         if (item)
         {
-            ret = item->CleanUp();
+            if (!item->CleanUp())
+            {
+                TraceLog(LOG_ERROR, "Error cleaning up module: %p", item);
+                ret = false;
+            }
         }
     }
 

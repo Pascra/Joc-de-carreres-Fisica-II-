@@ -66,12 +66,17 @@ update_status ModuleWindow::PostUpdate()
 // Called before quitting
 bool ModuleWindow::CleanUp()
 {
-	LOG("Close window");
+	LOG("Cleaning up ModuleWindow");
 
-    CloseWindow();
+	// Cerrar la ventana correctamente
+	if (IsWindowReady())
+	{
+		CloseWindow();
+	}
 
 	return true;
 }
+
 
 void ModuleWindow::SetTitle(const char* title)
 {

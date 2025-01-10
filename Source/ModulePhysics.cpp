@@ -375,9 +375,37 @@ bool ModulePhysics::CleanUp()
 {
 	LOG("Destroying physics world");
 
-	// Delete the whole physics world!
-	delete world;
+	if (world)
+	{
+		// Iterar sobre todos los cuerpos en el mundo
+		for (b2Body* body = world->GetBodyList(); body != nullptr; )
+		{
+			b2Body* nextBody = body->GetNext();
 
+			// Liberar el PhysBody asociado
+			PhysBody* physBody = (PhysBody*)body->GetUserData().pointer;
+			if (physBody)
+			{
+				//delete physBody; // Liberar memoria del PhysBody
+				body->GetUserData().pointer = 0; // Limpiar el puntero
+			}
+
+			world->DestroyBody(body); // Destruir el cuerpo físico
+			body = nextBody;
+		}
+
+		// Destruir el joint del ratón si existe
+		if (mouse_joint)
+		{
+			world->DestroyJoint(mouse_joint);
+			mouse_joint = nullptr;
+		}
+
+		delete world; // Liberar el mundo físico
+		world = nullptr;
+	}
+
+	LOG("Physics world destroyed successfully");
 	return true;
 }
 

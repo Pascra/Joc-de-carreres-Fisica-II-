@@ -206,7 +206,6 @@
     <ClCompile Include="Source\ModuleGame.cpp" />
     <ClCompile Include="Source\ModuleItem.cpp" />
     <ClCompile Include="Source\ModulePlayer.cpp" />
-    <ClCompile Include="Source\Source.cpp" />
     <ClCompile Include="Source\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
