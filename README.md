@@ -5,6 +5,7 @@
 ## About the game
 
 A fast-paced 2D pixel art racing game with a top-down static camera. Compete against a friend in local multiplayer and challenge AI opponents for high-speed action and fun!
+Made it with raylib and Box2d libraries dependences.
 
 ## Installation instructions
 
@@ -46,7 +47,7 @@ _1.0 version features (final version):_
 * Drift
 
 ## Video
-
+(https://youtu.be/qGKUOcd0bo8)
 
 # FrameStudios - Our team
 
