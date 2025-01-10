@@ -23,7 +23,7 @@ W Key (up)                 UP_ARROW (up)
 A Key (left)               LEFT_ARROW (left)
 S Key (down)               RIGHT_ARROW (down) 
 D Key (right)              DOWN_ARROW (right)
-SPACE Key (drift)
+SPACE Key (drift)          ENTER Key (drift)
 
 Special controls:
 F1 (debug mode --> collisions and sensors)
@@ -32,16 +32,23 @@ F1 (debug mode --> collisions and sensors)
 
 ## Features implemented
 
-_0.5 version features (this version is to receive feedback to improve):_
+_1.0 version features (final version):_
 
 * Github page
-* Assets (map, car, etc)
+* Assets (map, car, nitro, gamestates, etc)
 * Multiplayer
-* AI enemies implemented
+* AI enemie implemented
 * Implementation of debug key
-* Sensors (finish line, whole racetrack)
+* Sensors (finish line, whole racetrack checkpoints, friction zone, item)
 * Boost object
+* Game States
+* Audios
+* Collisions
 * WIN/LOSE condition 
+* Drift
+
+## Video
+
 
 # FrameStudios - Our team
 
