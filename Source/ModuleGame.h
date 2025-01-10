@@ -27,6 +27,7 @@ public:
     bool Start() override;
     update_status Update() override;
     void OnCollision(PhysBody* sensor, PhysBody* other) override;
+
     bool CleanUp() override;
     void DrawTime();
    
@@ -51,6 +52,11 @@ public:
     float player1WinMusicTimer = 0.0f; // Inicializa el temporizador
     float AIWinMusicTimer = 0.0f; // Inicializa el temporizador
 
+    bool is_touching_slowdown_p1 = false;
+    bool is_touching_slowdown_p2 = false;
+
+    void OnExitCollision(PhysBody* sensor, PhysBody* other);
+    bool IsPointInRectangle(int x, int y, int rect_x, int rect_y, int width, int height);
 private:
 
     // Textura para la pantalla de introducción
@@ -80,6 +86,7 @@ private:
     PhysBody* ai_body;          // Cuerpo físico del coche de la IA
     int current_checkpoint_ai;  // Índice del checkpoint actual que la IA persigue
     int laps_ai;
+    PhysBody* slowdown_zone = nullptr;
 
     void MoveAI(float deltaTime);
 

@@ -531,6 +531,15 @@ bool ModuleGame::Start()
         return false;
     }
     finish_line->listener = this;
+    // Sensor de friccion
+    slowdown_zone = App->physics->CreateRectangleSensor(210, 540, 180, 70);
+    if (!slowdown_zone) {
+        TraceLog(LOG_ERROR, "Failed to create slowdown zone sensor");
+        return false;
+    }
+    slowdown_zone->listener = this;
+    slowdown_zone->ctype = CollisionType::SLOWDOWN_ZONE;
+
 
     // Configuración inicial de la IA
     ai_position = { 913.7f, 535.0f }; // Cambia estas coordenadas según lo que desees
@@ -668,7 +677,7 @@ update_status ModuleGame::Update()
         );
 
         }
-
+      
         
 
         return UPDATE_CONTINUE;
@@ -898,10 +907,36 @@ update_status ModuleGame::Update()
     DrawTime();
     DrawLaps(); // Mostrar las vueltas completadas
 
+    if (is_touching_slowdown_p1) {
+        int car_x, car_y;
+        App->player->GetCarBody()->GetPhysicPosition(car_x, car_y);
+
+        if (!IsPointInRectangle(car_x, car_y, 210, 540, 180, 70)) { // Ajusta las coordenadas del slowdown
+            is_touching_slowdown_p1 = false;
+            App->player->RestoreSpeedModifier(1); // Restaurar velocidad si no está en el sensor
+            //TraceLog(LOG_INFO, "Player 1 exited slowdown zone");
+        }
+    }
+
+    // Verificar si Player 2 sigue en el slowdown
+    if (is_touching_slowdown_p2) {
+        int car2_x, car2_y;
+        App->player->GetPlayer2Body()->GetPhysicPosition(car2_x, car2_y);
+
+        if (!IsPointInRectangle(car2_x, car2_y, 210, 540, 180, 70)) { // Ajusta las coordenadas del slowdown
+            is_touching_slowdown_p2 = false;
+            App->player->RestoreSpeedModifier(2); // Restaurar velocidad si no está en el sensor
+           // TraceLog(LOG_INFO, "Player 2 exited slowdown zone");
+        }
+    }
+
     return UPDATE_CONTINUE;
 }
 
-
+bool ModuleGame::IsPointInRectangle(int x, int y, int rect_x, int rect_y, int width, int height) {
+    return x >= rect_x && x <= rect_x + width &&
+        y >= rect_y && y <= rect_y + height;
+}
 
 // OnCollision
 void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
@@ -966,7 +1001,38 @@ void ModuleGame::OnCollision(PhysBody* sensor, PhysBody* other)
             
         }
     }
+    //Sensor de ffriccion
+    if (sensor == slowdown_zone) {
+        if (other == App->player->GetCarBody() && !is_touching_slowdown_p1) {
+            is_touching_slowdown_p1 = true; // Marcar como en contacto
+            App->player->ApplySpeedModifier(1, 0.95f); // Reducir velocidad
+        }
+        if (other == App->player->GetPlayer2Body() && !is_touching_slowdown_p2) {
+            is_touching_slowdown_p2 = true; // Marcar como en contacto
+            App->player->ApplySpeedModifier(2, 0.95f);
+        }
+    }
 }
+
+
+void ModuleGame::OnExitCollision(PhysBody* sensor, PhysBody* other) {
+    if (sensor == slowdown_zone) {
+        TraceLog(LOG_INFO, "Exit slowdown zone collision detected");
+
+        if (other == App->player->GetCarBody()) {
+            is_touching_slowdown_p1 = false;
+            App->player->RestoreSpeedModifier(1);
+        }
+        if (other == App->player->GetPlayer2Body()) {
+            is_touching_slowdown_p2 = false;
+            App->player->RestoreSpeedModifier(2);
+        }
+    }
+}
+
+
+
+
 
 
 void ModuleGame::DrawTime() {
@@ -1061,7 +1127,10 @@ bool ModuleGame::CleanUp()
         delete ai_body;
         ai_body = nullptr;
     }
-
+    if (slowdown_zone) {
+        delete slowdown_zone;
+        slowdown_zone = nullptr;
+    }
     TraceLog(LOG_INFO, "Game assets unloaded successfully");
 
     return true;

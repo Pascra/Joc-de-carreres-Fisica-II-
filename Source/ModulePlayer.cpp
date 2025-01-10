@@ -524,3 +524,24 @@ bool ModulePlayer::CleanUp()
 
     return true;
 }
+void ModulePlayer::ApplySpeedModifier(int playerNum, float modifier) {
+    if (playerNum == 1) {
+        speed_boost_player1 *= modifier;
+        if (speed_boost_player1 < 0.5f) speed_boost_player1 = 0.5f; // No permitir menos del 50%
+    }
+    else if (playerNum == 2) {
+        speed_boost_player2 *= modifier;
+        if (speed_boost_player2 < 0.5f) speed_boost_player2 = 0.5f;
+    }
+}
+
+void ModulePlayer::RestoreSpeedModifier(int playerNum) {
+    if (playerNum == 1) {
+        speed_boost_player1 = base_speed_boost; // Restaurar solo el efecto del slowdown
+    }
+    else if (playerNum == 2) {
+        speed_boost_player2 = base_speed_boost;
+    }
+}
+
+

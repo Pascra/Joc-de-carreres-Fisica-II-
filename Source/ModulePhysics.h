@@ -21,6 +21,7 @@ enum CollisionType
 	ITEM,
 	DEFAULT,
 	AI,
+	SLOWDOWN_ZONE,
 	UNKNOWN = 0
 };
 

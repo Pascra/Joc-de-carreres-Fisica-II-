@@ -25,6 +25,9 @@ public:
 
     uint32 derrape_fx;
 
+    void ApplySpeedModifier(int playerNum, float modifier);
+    void RestoreSpeedModifier(int playerNum);
+
 
 
 private:
