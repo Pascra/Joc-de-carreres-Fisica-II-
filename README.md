@@ -1,8 +1,6 @@
 # 2D RacingGame
 
 * [Project's Github] (https://github.com/Pascra/Joc-de-carreres-Fisica-II-)
-* Github wiki of the project: 
-* Project web: 
 
 ## About the game
 
